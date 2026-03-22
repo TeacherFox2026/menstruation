@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <!-- PWA 與手機最佳化設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#6ee7b7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="小蛇月曆">
+    
+    <title>我的專屬小蛇月曆</title>
+    
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 引入可愛圓潤字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- 引入 Chart.js 動態圖表庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'M PLUS Rounded 1c', 'Nunito', sans-serif;
+            background-color: #e8f5e9;
+            background-image: radial-gradient(#bbf7d0 2px, transparent 2px);
+            background-size: 20px 20px;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none; /* 防止 Safari 彈性滾動造成的白邊 */
+        }
+        .book-shadow { box-shadow: 4px 4px 0 0 #34d399; }
+        .book-shadow-sm { box-shadow: 2px 2px 0 0 #6ee7b7; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #6ee7b7; border-radius: 10px; }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .modal-animate { animation: popIn 0.2s ease-out forwards; }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .floating { animation: float 3.5s ease-in-out infinite; }
+
+        @keyframes slideDown {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { transform: translateY(0); opacity: 1; }
+            90% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100%); opacity: 0; }
+        }
+        .toast-animate {
+            animation: slideDown 3.5s ease-in-out forwards;
+        }
+    </style>
+</head>
+<body class="flex justify-center text-gray-800">
+
+    <!-- === 全域通用浮動提示 === -->
+    <div id="toast" class="fixed top-safe left-0 right-0 z-[100] flex justify-center pointer-events-none hidden mt-4">
+        <div class="bg-white border-4 border-emerald-400 rounded-3xl p-3 px-5 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex items-center gap-3 max-w-[90%] book-shadow-sm">
+            <span id="toastIcon" class="text-3xl floating">🐍</span>
+            <p id="toastText" class="text-emerald-800 font-extrabold text-sm sm:text-base leading-snug"></p>
+        </div>
+    </div>
+
+    <!-- 手機版面容器 (使用 100dvh 完美適配手機真實高度) -->
+    <div class="w-full max-w-md bg-[#fdfbf7] h-[100dvh] max-h-[100dvh] flex flex-col border-x-4 border-emerald-400 shadow-2xl relative overflow-hidden">
+        
+        <div class="absolute top-3 left-3 text-2xl floating opacity-80 z-20 pointer-events-none">🌿</div>
+        <div class="absolute top-10 right-3 text-xl floating opacity-70 z-20 pointer-events-none" style="animation-delay: 1.5s;">🍃</div>
+
+        <!-- === 標頭區塊 === -->
+        <header class="bg-[#6ee7b7] text-emerald-900 p-4 pt-safe rounded-b-[2rem] book-shadow z-10 shrink-0 relative border-b-4 border-emerald-500">
+            <div class="flex justify-between items-center mb-4 pl-6 pt-2">
+                <h1 class="text-xl font-extrabold flex items-center gap-2 tracking-wide text-[#064e3b]">
+                    <span class="text-2xl">🐍</span>
+                    小蛇月曆
+                </h1>
+                <div class="flex gap-2 relative z-30">
+                    <button onclick="document.getElementById('importFile').click()" class="w-9 h-9 bg-white/70 rounded-full flex items-center justify-center hover:bg-white transition text-emerald-800 active:scale-90 border-2 border-emerald-300 shadow-sm">
+                        <i class="fa-solid fa-file-import"></i>
+                    </button>
+                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="handleImport(event)">
+                    
+                    <button onclick="handleExport()" class="w-9 h-9 bg-white/70 rounded-full flex items-center justify-center hover:bg-white transition text-emerald-800 active:scale-90 border-2 border-emerald-300 shadow-sm">
+                        <i class="fa-solid fa-file-export"></i>
+                    </button>
+                    
+                    <button onclick="openStatsModal()" class="w-9 h-9 bg-white/70 rounded-full flex items-center justify-center hover:bg-white transition text-emerald-800 active:scale-90 border-2 border-emerald-300 shadow-sm">
+                        <i class="fa-solid fa-chart-bar"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center bg-white rounded-full p-1 border-4 border-emerald-400 shadow-sm relative z-30">
+                <button onclick="changeMonth(-1)" class="w-10 h-10 flex items-center justify-center hover:bg-emerald-100 rounded-full transition active:scale-90 text-emerald-700">
+                    <i class="fa-solid fa-caret-left text-2xl"></i>
+                </button>
+                <span id="monthDisplay" class="text-lg font-extrabold tracking-wider text-emerald-900">2024年 5月</span>
+                <button onclick="changeMonth(1)" class="w-10 h-10 flex items-center justify-center hover:bg-emerald-100 rounded-full transition active:scale-90 text-emerald-700">
+                    <i class="fa-solid fa-caret-right text-2xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- === 上半部：月曆區塊 === -->
+        <div class="p-4 shrink-0 z-0">
+            <div class="bg-white border-4 border-emerald-400 rounded-[2rem] p-3 book-shadow-sm relative">
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                    <div class="text-center font-extrabold text-emerald-700 text-sm">一</div>
+                    <div class="text-center font-extrabold text-emerald-700 text-sm">二</div>
+                    <div class="text-center font-extrabold text-emerald-700 text-sm">三</div>
+                    <div class="text-center font-extrabold text-emerald-700 text-sm">四</div>
+                    <div class="text-center font-extrabold text-emerald-700 text-sm">五</div>
+                    <div class="text-center font-extrabold text-pink-400 text-sm">六</div>
+                    <div class="text-center font-extrabold text-pink-500 text-sm">日</div>
+                </div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-1"></div>
+                
+                <div id="cycleSummary" class="mt-3 text-center text-sm font-extrabold text-emerald-800 bg-[#f0fdf4] rounded-xl py-2 border-[3px] border-dashed border-emerald-300">
+                    <!-- JS 動態產生完整週期統計 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- === 下半部：紀錄列表區塊 === -->
+        <div class="flex-1 min-h-0 bg-[#f0fdf4] p-4 rounded-t-[2.5rem] border-t-4 border-x-4 border-emerald-400 flex flex-col shadow-[0_-4px_10px_rgba(0,0,0,0.05)] mx-[-4px]">
+            <h2 class="text-lg font-extrabold text-emerald-900 mb-3 flex items-center gap-2 shrink-0">
+                <span class="bg-emerald-200 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-sm">📖</span>
+                蛇蛇小本本 <span class="text-sm text-emerald-600 font-bold ml-1">(完整週期)</span>
+            </h2>
+            <div id="recordList" class="flex-1 overflow-y-auto space-y-3 pb-safe pr-1 pb-8">
+                <!-- 由 JS 動態產生 -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- === 彈出視窗：新增/編輯紀錄 === -->
+    <div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex-col items-center justify-center p-4">
+        <div class="bg-white w-full max-w-[340px] rounded-[2.5rem] border-4 border-emerald-500 book-shadow p-6 modal-animate relative">
+            <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-5xl floating">🐍</div>
+            
+            <div class="flex justify-between items-center mb-4 border-b-4 border-emerald-100 pb-3 mt-4">
+                <h3 id="modalDateTitle" class="text-xl font-extrabold text-emerald-900 tracking-wider"></h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 bg-emerald-100 rounded-full text-emerald-800 hover:bg-emerald-200 flex items-center justify-center font-bold border-2 border-emerald-200">✕</button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-extrabold text-emerald-800 mb-2">今天感覺怎麼樣呢？🌿</label>
+                    <div class="grid grid-cols-2 gap-2" id="statusButtons">
+                        <button onclick="selectStatus('light')" id="btn-light" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">💧 量少</button>
+                        <button onclick="selectStatus('normal')" id="btn-normal" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">😊 正常</button>
+                        <button onclick="selectStatus('heavy')" id="btn-heavy" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">🌊 量多</button>
+                        <button onclick="selectStatus('special')" id="btn-special" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">⚠️ 特殊</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-extrabold text-emerald-800 mb-2">寫點什麼吧 (選填) ✏️</label>
+                    <textarea id="noteInput" rows="3" placeholder="想吃甜的、肚子悶悶..." class="w-full bg-[#f8fafc] border-4 border-emerald-200 rounded-2xl p-3 text-gray-800 font-bold focus:outline-none focus:border-emerald-400 resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button id="deleteBtn" onclick="openConfirmModal()" class="flex-1 flex justify-center items-center gap-1 py-3 bg-red-50 text-red-600 font-extrabold rounded-2xl border-b-4 border-red-300 active:translate-y-1 active:border-b-0 transition-all hidden">
+                        🗑️ 刪除
+                    </button>
+                    <button onclick="saveRecord()" class="flex-[2] flex justify-center items-center gap-1 py-3 bg-emerald-400 text-white font-extrabold rounded-2xl border-b-4 border-emerald-600 active:translate-y-1 active:border-b-0 transition-all">
+                        ✔️ 記下來了！
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === 彈出視窗：刪除防呆確認 === -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex-col items-center justify-center p-4">
+        <div class="bg-white w-full max-w-[300px] rounded-[2rem] border-4 border-red-400 book-shadow p-6 modal-animate relative text-center">
+            <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-5xl floating">🥺</div>
+            
+            <h3 class="text-xl font-extrabold text-red-600 mb-2 mt-4">溫馨提醒 🐍</h3>
+            <p class="text-gray-700 font-bold mb-6 text-sm leading-relaxed">
+                親愛的，確定要刪除這天的紀錄嗎？<br>擦掉的話就找不回來囉！
+            </p>
+            
+            <div class="flex gap-2">
+                <button onclick="closeConfirmModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-extrabold rounded-2xl border-b-4 border-gray-300 active:translate-y-1 active:border-b-0 transition-all">
+                    取消
+                </button>
+                <button onclick="executeDelete()" class="flex-1 py-3 bg-red-400 text-white font-extrabold rounded-2xl border-b-4 border-red-600 active:translate-y-1 active:border-b-0 transition-all">
+                    確定刪除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === 彈出視窗：極簡一行式醫生統計報告 + 長條圖 === -->
+    <div id="statsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex-col justify-end">
+        <div class="bg-[#fdfbf7] w-full max-w-md mx-auto h-[90vh] rounded-t-[2.5rem] border-t-4 border-x-4 border-emerald-500 shadow-[0_-8px_0_0_#10b981] flex flex-col transform transition-transform duration-300 translate-y-full" id="statsModalContent">
+            
+            <div class="p-4 flex justify-between items-center border-b-4 border-emerald-200 shrink-0 bg-white rounded-t-[2.2rem]">
+                <h3 class="text-xl font-extrabold text-emerald-900 flex items-center gap-2">
+                    <span class="text-2xl">🏥</span>
+                    給醫生的蛇蛇報告
+                </h3>
+                <button onclick="closeStatsModal()" class="w-9 h-9 bg-emerald-100 rounded-full text-emerald-800 hover:bg-emerald-200 flex items-center justify-center font-bold border-2 border-emerald-200">✕</button>
+            </div>
+            
+            <div class="flex-1 min-h-0 flex flex-col bg-[#f0fdf4] p-4">
+                <div class="bg-white p-3 rounded-3xl border-4 border-emerald-300 mb-3 book-shadow-sm shrink-0">
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="date" id="startDate" class="flex-1 p-2 rounded-xl border-4 border-emerald-100 text-xs font-bold text-gray-700 focus:outline-none focus:border-emerald-400 bg-gray-50">
+                        <span class="text-emerald-500 font-extrabold">~</span>
+                        <input type="date" id="endDate" class="flex-1 p-2 rounded-xl border-4 border-emerald-100 text-xs font-bold text-gray-700 focus:outline-none focus:border-emerald-400 bg-gray-50">
+                    </div>
+                    <button onclick="renderStats()" class="w-full bg-emerald-400 text-white font-extrabold py-2 rounded-xl border-b-4 border-emerald-600 active:translate-y-1 active:border-b-0 transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-search"></i> 重新分析
+                    </button>
+                </div>
+
+                <!-- 動態圖表區塊 -->
+                <div id="chartContainer" class="bg-white p-3 rounded-3xl border-4 border-emerald-300 mb-3 book-shadow-sm shrink-0 hidden h-48">
+                    <canvas id="periodChart"></canvas>
+                </div>
+
+                <div id="statsList" class="flex-1 overflow-y-auto space-y-2 pb-safe pr-1 pb-8">
+                    <!-- 統計紀錄由 JS 產生 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === 彈出視窗：特殊狀況備註詳情 === -->
+    <div id="specialNoteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex-col items-center justify-center p-4">
+        <div class="bg-white w-full max-w-[320px] rounded-[2.5rem] border-4 border-amber-400 book-shadow p-6 modal-animate relative">
+            <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-5xl floating">⚠️</div>
+            
+            <div class="flex justify-between items-center mb-4 border-b-4 border-amber-100 pb-3 mt-4">
+                <h3 class="text-xl font-extrabold text-amber-900 tracking-wider">週期備註詳情</h3>
+                <button onclick="closeSpecialNoteModal()" class="w-8 h-8 bg-amber-100 rounded-full text-amber-800 hover:bg-amber-200 flex items-center justify-center font-bold border-2 border-amber-200">✕</button>
+            </div>
+
+            <div id="specialNoteContent" class="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
+            </div>
+
+            <div class="mt-4 pt-2">
+                <button onclick="closeSpecialNoteModal()" class="w-full flex justify-center items-center py-3 bg-amber-400 text-amber-950 font-extrabold rounded-2xl border-b-4 border-amber-600 active:translate-y-1 active:border-b-0 transition-all">
+                    了解！
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STATUS_OPTIONS = {
+            light: { id: 'light', label: '量少', colorClass: 'bg-pink-100 border-pink-300 text-pink-700' },
+            normal: { id: 'normal', label: '正常', colorClass: 'bg-rose-500 border-rose-700 text-white' },
+            heavy: { id: 'heavy', label: '量多', colorClass: 'bg-[#881337] border-[#4c0519] text-white' },
+            special: { id: 'special', label: '特殊', colorClass: 'bg-amber-400 border-amber-600 text-amber-950' }
+        };
+
+        const nPrefix = ["嘶嘶～", "親愛的，", "老婆辛苦啦！", "摸摸頭～", "小蛇來報到！", "呼呼～", "寶貝，", "哎呀，", "嘿嘿，", "乖乖～"];
+        const nBody = ["喝點溫水暖暖肚子喔！", "今天也要把你寵上天！", "不舒服就盡情使喚老公吧！", "給你一個大大的擁抱！", "想吃什麼甜點？老公去買！", "肚子痛痛飛走囉！", "今天你是女王，什麼都不用做！", "多休息，別累壞了喔！", "不管量多量少，老公都愛你！", "小蛇為你施展魔法！"];
+        const nSuffix = ["🐍💚", "✨", "🥰"];
+        const sPrefix = ["哎呀！怎麼了？", "老婆沒事吧？", "小蛇很擔心捏...", "心疼老婆...", "怎麼會這樣～"];
+        const sBody = ["有不舒服一定要跟我說喔！", "隨時待命帶你去看醫生！", "別怕，我一直都在你身邊！", "這幾天我會好好照顧你的！", "放下手邊的事休息好嗎？"];
+        const sSuffix = ["🥺", "🐍💦", "🏥", "🫂"];
+
+        let currentDate = new Date();
+        let records = JSON.parse(localStorage.getItem('period_records')) || {};
+        let editingDate = null;
+        let currentStatus = null;
+        let isListExpanded = false;
+        let currentDisplayCycles = [];
+
+        function init() {
+            const today = new Date();
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(today.getMonth() - 6);
+            document.getElementById('startDate').value = getFormatDate(sixMonthsAgo);
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            document.getElementById('endDate').value = getFormatDate(endOfMonth);
+            renderAll();
+        }
+
+        function getFormatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+        function getTodayStr() { return getFormatDate(new Date()); }
+
+        // 核心修正：精確計算「實際登錄天數」
+        function calculateAllCycles() {
+            const dates = Object.keys(records).sort();
+            const cycles = [];
+            let currentCycle = null;
+
+            for (const dateStr of dates) {
+                if (!currentCycle) {
+                    currentCycle = { start: dateStr, end: dateStr, records: [dateStr] };
+                } else {
+                    const dateObj = new Date(dateStr);
+                    const prevDateObj = new Date(currentCycle.end);
+                    const diffDays = Math.ceil(Math.abs(dateObj - prevDateObj) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays <= 4) {
+                        currentCycle.end = dateStr;
+                        currentCycle.records.push(dateStr);
+                    } else {
+                        cycles.push(currentCycle);
+                        currentCycle = { start: dateStr, end: dateStr, records: [dateStr] };
+                    }
+                }
+            }
+            if (currentCycle) cycles.push(currentCycle);
+
+            cycles.forEach(c => {
+                // 這裡精確計算實際有紀錄的日數，解決您提出的「刪除中間天數，總天數卻沒變」的問題
+                c.duration = c.records.length; 
+                
+                c.hasSpecial = false;
+                c.notes = []; 
+                c.records.forEach(d => { 
+                    const record = records[d];
+                    if(record.status === 'special') c.hasSpecial = true; 
+                    if(record.note) {
+                        c.notes.push({ date: d, text: record.note, status: record.status });
+                    }
+                });
+            });
+            return cycles;
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            isListExpanded = false;
+            renderAll();
+        }
+
+        function renderAll() {
+            const allCycles = calculateAllCycles();
+            renderCalendar(allCycles);
+            renderList(allCycles);
+        }
+
+        function renderCalendar(allCycles) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const viewStartStr = getFormatDate(new Date(year, month, 1));
+            const viewEndStr = getFormatDate(new Date(year, month + 1, 0));
+
+            document.getElementById('monthDisplay').innerText = `${year}年 ${month + 1}月`;
+            
+            const firstDayRaw = new Date(year, month, 1).getDay();
+            const firstDay = firstDayRaw === 0 ? 6 : firstDayRaw - 1; 
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="p-2"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(year, month, day);
+                const dateStr = getFormatDate(dateObj);
+                const record = records[dateStr];
+                const isToday = dateStr === getTodayStr();
+                
+                let btnClass = "relative aspect-square flex flex-col items-center justify-center rounded-[1rem] border-[3px] transition-transform active:scale-90 font-extrabold ";
+                if (record) {
+                    btnClass += STATUS_OPTIONS[record.status].colorClass;
+                } else {
+                    btnClass += isToday ? "bg-white border-emerald-400 text-emerald-600 shadow-md" : "bg-emerald-50/50 border-transparent text-emerald-800 hover:bg-emerald-100";
+                }
+                const dotColor = (record && (record.status === 'heavy' || record.status === 'normal' || record.status === 'special')) ? 'bg-white' : 'bg-emerald-700';
+                const dotHtml = (record && record.note) ? `<span class="absolute bottom-1 w-2 h-2 rounded-full ${dotColor} opacity-90 border border-black/10"></span>` : '';
+
+                grid.innerHTML += `<button onclick="openEditModal('${dateStr}')" class="${btnClass}"><span class="z-10 text-sm sm:text-base">${day}</span>${dotHtml}</button>`;
+            }
+
+            const cyclesInView = allCycles.filter(c => c.end >= viewStartStr && c.start <= viewEndStr);
+            const summaryEl = document.getElementById('cycleSummary');
+            if (cyclesInView.length > 0) {
+                const latest = cyclesInView[cyclesInView.length - 1];
+                const sFormat = latest.start.slice(5).replace('-', '/');
+                const eFormat = latest.end.slice(5).replace('-', '/');
+                summaryEl.innerHTML = `🐍 當次月經統計：${sFormat} ~ ${eFormat} <span class="text-rose-500 ml-1">共 ${latest.duration} 天</span>`;
+            } else {
+                summaryEl.innerHTML = `<span class="opacity-60">本月尚無完整月經紀錄喔 🥚</span>`;
+            }
+        }
+
+        function renderList(allCycles) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const viewStartStr = getFormatDate(new Date(year, month, 1));
+            const viewEndStr = getFormatDate(new Date(year, month + 1, 0));
+            
+            const cyclesInView = allCycles.filter(c => c.end >= viewStartStr && c.start <= viewEndStr);
+            
+            let recordsToDisplay = [];
+            cyclesInView.forEach(c => {
+                c.records.forEach(d => {
+                    recordsToDisplay.push([d, records[d]]);
+                });
+            });
+            recordsToDisplay.sort(([a], [b]) => a.localeCompare(b));
+
+            const listContainer = document.getElementById('recordList');
+            listContainer.innerHTML = '';
+
+            if (recordsToDisplay.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-8 text-emerald-600 font-extrabold bg-white rounded-3xl border-4 border-dashed border-emerald-300 mt-2 flex flex-col items-center shadow-sm">
+                        <span class="text-4xl mb-2 opacity-80">🥚</span>
+                        這個月還空空的喔～<br/>蛇蛇在等妳寫日記！
+                    </div>
+                `;
+                return;
+            }
+
+            const displayCount = isListExpanded ? recordsToDisplay.length : 10;
+            const slicedRecords = recordsToDisplay.slice(0, displayCount);
+
+            slicedRecords.forEach(([date, data]) => {
+                const statusInfo = STATUS_OPTIONS[data.status];
+                
+                listContainer.innerHTML += `
+                    <div onclick="openEditModal('${date}')" class="bg-white border-[3px] border-emerald-200 rounded-2xl p-3 flex items-start gap-3 book-shadow-sm cursor-pointer hover:-translate-y-1 transition-transform active:scale-[0.98]">
+                        <div class="shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center border-4 ${statusInfo.colorClass}">
+                            <span class="text-xs opacity-90 font-extrabold">${date.slice(5).replace('-', '/')}</span>
+                            <span class="font-extrabold text-sm tracking-widest">${statusInfo.label}</span>
+                        </div>
+                        <div class="flex-1 py-1">
+                            <p class="text-sm font-bold ${data.note ? 'text-gray-800' : 'text-gray-400'} break-words whitespace-pre-wrap leading-relaxed">${data.note || "（沒有寫備註唷 🍃）"}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (!isListExpanded && recordsToDisplay.length > 10) {
+                listContainer.innerHTML += `
+                    <button onclick="toggleListExpand()" class="w-full py-3 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-2xl border-4 border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2">
+                        <i class="fa-solid fa-angle-down mr-1"></i> 翻開更多...
+                    </button>
+                `;
+            } else if (isListExpanded && recordsToDisplay.length > 10) {
+                 listContainer.innerHTML += `
+                    <button onclick="toggleListExpand()" class="w-full py-3 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-2xl border-4 border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2">
+                        <i class="fa-solid fa-angle-up mr-1"></i> 收起筆記
+                    </button>
+                `;
+            }
+        }
+
+        function toggleListExpand() {
+            isListExpanded = !isListExpanded;
+            renderAll();
+        }
+
+        // 系統提示機制
+        let toastTimeout;
+        function showCustomToast(msg, icon = '🐍') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastIcon').innerText = icon;
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.remove('hidden', 'toast-animate');
+            void toast.offsetWidth; 
+            toast.classList.add('toast-animate');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => { toast.classList.add('hidden'); }, 3500);
+        }
+
+        function getFeedbackMessage(status) {
+            if(status === 'special') return sPrefix[Math.floor(Math.random()*5)] + sBody[Math.floor(Math.random()*5)] + sSuffix[Math.floor(Math.random()*4)];
+            return nPrefix[Math.floor(Math.random()*10)] + nBody[Math.floor(Math.random()*10)] + nSuffix[Math.floor(Math.random()*3)];
+        }
+
+        function openEditModal(dateStr) {
+            editingDate = dateStr;
+            const record = records[dateStr];
+            document.getElementById('modalDateTitle').innerText = `${dateStr}`;
+            document.getElementById('noteInput').value = record ? record.note : '';
+            currentStatus = record ? record.status : 'normal';
+            updateStatusButtonsUI();
+            const deleteBtn = document.getElementById('deleteBtn');
+            if (record) deleteBtn.classList.remove('hidden');
+            else deleteBtn.classList.add('hidden');
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
+        function selectStatus(statusId) {
+            currentStatus = statusId;
+            updateStatusButtonsUI();
+            showCustomToast(getFeedbackMessage(statusId), '🐍');
+        }
+
+        function updateStatusButtonsUI() {
+            ['light', 'normal', 'heavy', 'special'].forEach(id => {
+                const btn = document.getElementById(`btn-${id}`);
+                const info = STATUS_OPTIONS[id];
+                if (id === currentStatus) {
+                    btn.className = `status-btn py-3 rounded-2xl font-extrabold border-[4px] transition-transform active:scale-95 scale-105 shadow-lg ${info.colorClass}`;
+                } else {
+                    btn.className = `status-btn py-3 rounded-2xl font-extrabold border-4 bg-white border-gray-200 text-gray-400 transition-transform active:scale-95 hover:bg-gray-50`;
+                }
+            });
+        }
+
+        function saveRecord() {
+            records[editingDate] = { status: currentStatus, note: document.getElementById('noteInput').value.trim() };
+            saveToLocal(); closeEditModal(); renderAll(); 
+            showCustomToast('已經幫你記下來囉！', '✔️');
+        }
+
+        // 刪除防呆邏輯
+        function openConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function executeDelete() {
+            delete records[editingDate];
+            saveToLocal(); 
+            closeConfirmModal();
+            closeEditModal(); 
+            renderAll(); 
+            showCustomToast('紀錄已經擦掉囉 🧽', '🗑️');
+        }
+
+        function saveToLocal() { localStorage.setItem('period_records', JSON.stringify(records)); }
+
+        // 醫生報告與圖表
+        function openStatsModal() {
+            const modal = document.getElementById('statsModal');
+            const content = document.getElementById('statsModalContent');
+            modal.style.display = 'flex';
+            setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
+            renderStats();
+        }
+
+        function closeStatsModal() {
+            const content = document.getElementById('statsModalContent');
+            content.classList.add('translate-y-full');
+            setTimeout(() => { document.getElementById('statsModal').style.display = 'none'; }, 300);
+        }
+
+        function renderStats() {
+            const startStr = document.getElementById('startDate').value;
+            const endStr = document.getElementById('endDate').value;
+            const listContainer = document.getElementById('statsList');
+            const chartContainer = document.getElementById('chartContainer');
+
+            if(!startStr || !endStr || startStr > endStr) {
+                listContainer.innerHTML = `<div class="text-center py-4 text-red-500 font-extrabold">日期選錯囉！檢查一下 🙈</div>`; 
+                chartContainer.classList.add('hidden');
+                return;
+            }
+
+            const allCycles = calculateAllCycles();
+            currentDisplayCycles = allCycles.filter(c => c.end >= startStr && c.start <= endStr).reverse();
+
+            listContainer.innerHTML = '';
+
+            if (currentDisplayCycles.length === 0) {
+                chartContainer.classList.add('hidden');
+                listContainer.innerHTML = `
+                    <div class="text-center py-10 text-emerald-600 font-extrabold bg-white rounded-3xl border-4 border-dashed border-emerald-300 shadow-sm">
+                        <span class="text-4xl mb-2 block opacity-80">🏥</span>這段時間沒有紀錄喔！
+                    </div>
+                `; return;
+            }
+
+            chartContainer.classList.remove('hidden');
+            const chartCycles = [...currentDisplayCycles].reverse();
+            const labels = chartCycles.map(c => c.start.slice(5).replace('-', '/'));
+            const chartData = chartCycles.map(c => c.duration);
+
+            const ctx = document.getElementById('periodChart').getContext('2d');
+            if (window.periodChartInstance) window.periodChartInstance.destroy();
+            
+            window.periodChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '月經天數',
+                        data: chartData,
+                        backgroundColor: chartData.map(d => d > 10 ? 'rgba(244, 63, 94, 0.85)' : 'rgba(52, 211, 153, 0.85)'),
+                        borderColor: chartData.map(d => d > 10 ? 'rgba(225, 29, 72, 1)' : 'rgba(16, 185, 129, 1)'),
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: Math.max(...chartData, 12),
+                            title: { display: true, text: '總天數', font: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif", weight: 'bold' } },
+                            grid: {
+                                color: (context) => context.tick.value === 10 ? 'rgba(244, 63, 94, 0.5)' : 'rgba(0,0,0,0.05)',
+                                lineWidth: (context) => context.tick.value === 10 ? 2 : 1
+                            }
+                        },
+                        x: { ticks: { font: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif", weight: 'bold' } } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            titleFont: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif" },
+                            bodyFont: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif" },
+                            callbacks: {
+                                label: (context) => context.raw > 10 ? `${context.raw} 天 (⚠️ 超過10天危險指標)` : `${context.raw} 天`
+                            }
+                        }
+                    }
+                }
+            });
+
+            currentDisplayCycles.forEach((cycle, index) => {
+                const sFormat = cycle.start.replace(/-/g, '/');
+                const eFormat = cycle.end.replace(/-/g, '/');
+                const warnBadge = cycle.hasSpecial ? 
+                    `<button onclick="openSpecialNoteModal(${index})" class="ml-1 text-[11px] bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full shadow-sm align-middle hover:bg-amber-300 active:scale-90 transition-transform cursor-pointer font-extrabold inline-flex items-center">⚠️ 看備註</button>` : '';
+                const isDanger = cycle.duration > 10;
+                const durationClass = isDanger ? "text-rose-600 bg-rose-100 border-rose-300" : "text-emerald-700 bg-emerald-50 border-emerald-200";
+
+                listContainer.innerHTML += `
+                    <div class="bg-white border-[3px] ${isDanger ? 'border-rose-100' : 'border-emerald-100'} rounded-2xl p-3 flex justify-between items-center shadow-sm hover:bg-gray-50 transition-colors">
+                        <div class="font-extrabold ${isDanger ? 'text-rose-900' : 'text-emerald-900'} text-sm sm:text-base tracking-tight flex items-center flex-wrap gap-y-1">
+                            ${sFormat} <span class="text-gray-300 mx-0.5">~</span> ${eFormat}
+                            ${warnBadge}
+                        </div>
+                        <div class="font-extrabold px-3 py-1.5 rounded-xl border-2 shrink-0 text-sm ml-2 ${durationClass}">
+                            共 ${cycle.duration} 天
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 特殊備註彈出邏輯
+        function openSpecialNoteModal(index) {
+            const cycle = currentDisplayCycles[index];
+            const contentDiv = document.getElementById('specialNoteContent');
+            contentDiv.innerHTML = '';
+
+            if (cycle.notes.length === 0) {
+                contentDiv.innerHTML = `<div class="text-center py-5 text-amber-700 font-bold bg-amber-50 rounded-2xl border-2 border-dashed border-amber-200">只有標示狀態，沒有寫字唷 🍃</div>`;
+            } else {
+                cycle.notes.forEach(note => {
+                    const isSpecial = note.status === 'special';
+                    const badge = isSpecial ? `<span class="text-[10px] bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full ml-2 shadow-sm">特殊</span>` : '';
+                    const borderClass = isSpecial ? 'border-amber-300 bg-amber-50' : 'border-gray-100 bg-[#f8fafc]';
+                    
+                    contentDiv.innerHTML += `
+                        <div class="${borderClass} border-[3px] rounded-2xl p-3">
+                            <div class="text-xs font-extrabold text-emerald-800 mb-1.5 flex items-center">
+                                📅 ${note.date.replace(/-/g, '/')} ${badge}
+                            </div>
+                            <div class="text-sm font-bold text-gray-800 whitespace-pre-wrap leading-relaxed">${note.text}</div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('specialNoteModal').style.display = 'flex';
+        }
+
+        function closeSpecialNoteModal() { document.getElementById('specialNoteModal').style.display = 'none'; }
+
+        // 檔案處理與提示
+        function handleExport() {
+            if(Object.keys(records).length === 0) { 
+                showCustomToast('目前還沒有紀錄喔！', '❌'); 
+                return; 
+            }
+            const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `snake_records_${getTodayStr().replace(/-/g, '')}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            showCustomToast('已經幫你打包好備份囉！', '📦');
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if(typeof data === 'object' && !Array.isArray(data)) {
+                        records = data; saveToLocal(); renderAll(); 
+                        showCustomToast('資料匯入成功！ 🐍🎉', '✨');
+                    } else throw new Error();
+                } catch (error) { 
+                    showCustomToast('哎呀，檔案格式不對喔。', '❌'); 
+                }
+            };
+            reader.readAsText(file); event.target.value = '';
+        }
+
+        init();
+    </script>
+</body>
+</html>
