@@ -464,7 +464,10 @@
             let recordsToDisplay = [];
             cyclesInView.forEach(c => {
                 c.records.forEach(d => {
-                    recordsToDisplay.push([d, records[d]]);
+                    // ✅ 修正：只有「有填寫備註」的日期才會加進清單
+                    if (records[d] && records[d].note && records[d].note.trim() !== '') {
+                        recordsToDisplay.push([d, records[d]]);
+                    }
                 });
             });
             recordsToDisplay.sort(([a], [b]) => a.localeCompare(b));
@@ -474,9 +477,9 @@
 
             if (recordsToDisplay.length === 0) {
                 listContainer.innerHTML = `
-                    <div class="text-center py-8 text-emerald-600 font-extrabold bg-white rounded-3xl border-4 border-dashed border-emerald-300 mt-2 flex flex-col items-center shadow-sm">
-                        <span class="text-4xl mb-2 opacity-80">🥚</span>
-                        這個月還空空的喔～<br/>蛇蛇在等妳寫日記！
+                    <div class="text-center py-6 text-emerald-600 font-extrabold bg-white rounded-3xl border-4 border-dashed border-emerald-300 mt-2 flex flex-col items-center shadow-sm">
+                        <span class="text-4xl mb-2 opacity-80">🍃</span>
+                        這段期間沒有寫備註唷～<br/>點擊上方月曆可以新增！
                     </div>
                 `;
                 return;
@@ -488,14 +491,15 @@
             slicedRecords.forEach(([date, data]) => {
                 const statusInfo = STATUS_OPTIONS[data.status];
                 
+                // ✅ 修正：降低欄位高度 (減小 padding、按鈕尺寸與字體微調)
                 listContainer.innerHTML += `
-                    <div onclick="openEditModal('${date}')" class="bg-white border-[3px] border-emerald-200 rounded-2xl p-3 flex items-start gap-3 book-shadow-sm cursor-pointer hover:-translate-y-1 transition-transform active:scale-[0.98]">
-                        <div class="shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center border-4 ${statusInfo.colorClass}">
-                            <span class="text-xs opacity-90 font-extrabold">${date.slice(5).replace('-', '/')}</span>
-                            <span class="font-extrabold text-sm tracking-widest">${statusInfo.label}</span>
+                    <div onclick="openEditModal('${date}')" class="bg-white border-2 border-emerald-200 rounded-[1rem] p-2.5 flex items-start gap-3 shadow-sm cursor-pointer hover:-translate-y-0.5 transition-transform active:scale-[0.98]">
+                        <div class="shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center border-2 ${statusInfo.colorClass}">
+                            <span class="text-[10px] opacity-90 font-extrabold leading-tight">${date.slice(5).replace('-', '/')}</span>
+                            <span class="font-extrabold text-xs tracking-widest leading-tight">${statusInfo.label}</span>
                         </div>
-                        <div class="flex-1 py-1">
-                            <p class="text-sm font-bold ${data.note ? 'text-gray-800' : 'text-gray-400'} break-words whitespace-pre-wrap leading-relaxed">${data.note || "（沒有寫備註唷 🍃）"}</p>
+                        <div class="flex-1 py-0.5">
+                            <p class="text-[13px] font-bold text-gray-800 break-words whitespace-pre-wrap leading-snug">${data.note}</p>
                         </div>
                     </div>
                 `;
@@ -503,13 +507,13 @@
 
             if (!isListExpanded && recordsToDisplay.length > 10) {
                 listContainer.innerHTML += `
-                    <button onclick="toggleListExpand()" class="w-full py-3 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-2xl border-4 border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2">
+                    <button onclick="toggleListExpand()" class="w-full py-2.5 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-xl border-[3px] border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2 text-sm">
                         <i class="fa-solid fa-angle-down mr-1"></i> 翻開更多...
                     </button>
                 `;
             } else if (isListExpanded && recordsToDisplay.length > 10) {
                  listContainer.innerHTML += `
-                    <button onclick="toggleListExpand()" class="w-full py-3 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-2xl border-4 border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2">
+                    <button onclick="toggleListExpand()" class="w-full py-2.5 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-xl border-[3px] border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2 text-sm">
                         <i class="fa-solid fa-angle-up mr-1"></i> 收起筆記
                     </button>
                 `;
