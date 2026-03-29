@@ -58,7 +58,8 @@
             100% { transform: translateY(-100%); opacity: 0; }
         }
         .toast-animate {
-            animation: slideDown 3.5s ease-in-out forwards;
+            /* 修正動畫時間為 5.5 秒 */
+            animation: slideDown 5.5s ease-in-out forwards;
         }
     </style>
 </head>
@@ -86,7 +87,7 @@
                     <span class="truncate">小蛇紀錄本</span>
                 </h1>
                 <div class="flex gap-2 relative z-30 shrink-0">
-                    <!-- App 原生安裝按鈕 (預設隱藏，符合條件時出現) -->
+                    <!-- App 原生安裝按鈕 -->
                     <button id="installBtn" onclick="installApp()" class="hidden w-auto px-3 h-9 bg-pink-100 rounded-full items-center justify-center hover:bg-pink-200 transition text-pink-700 font-extrabold active:scale-90 border-2 border-pink-300 shadow-sm gap-1 text-sm">
                         <i class="fa-solid fa-download"></i> 安裝
                     </button>
@@ -113,7 +114,7 @@
             </div>
         </header>
 
-        <!-- === 上半部：月曆區塊 (瘦身版) === -->
+        <!-- === 上半部：月曆區塊 === -->
         <div class="p-3 shrink-0 z-0">
             <div class="bg-white border-4 border-emerald-400 rounded-3xl p-2 book-shadow-sm relative">
                 <div class="grid grid-cols-7 gap-1 mb-1.5">
@@ -125,7 +126,6 @@
                     <div class="text-center font-extrabold text-pink-400 text-sm">六</div>
                     <div class="text-center font-extrabold text-pink-500 text-sm">日</div>
                 </div>
-                <!-- 日期格子 -->
                 <div id="calendarGrid" class="grid grid-cols-7 gap-x-1 gap-y-1.5"></div>
                 
                 <div id="cycleSummary" class="mt-2 text-center text-xs sm:text-sm font-extrabold text-emerald-800 bg-[#f0fdf4] rounded-xl py-1.5 border-[3px] border-dashed border-emerald-300">
@@ -154,7 +154,6 @@
             
             <h3 class="text-xl font-extrabold text-emerald-900 mb-4 mt-4">資料管理</h3>
             
-            <!-- 隱藏的實體檔案上傳列 -->
             <input type="file" id="importFileReal" accept=".json" class="hidden" onchange="handleImport(event)">
             
             <div class="space-y-3">
@@ -259,7 +258,6 @@
                 </div>
 
                 <div id="statsList" class="flex-1 overflow-y-auto space-y-2 pb-safe pr-1 pb-8">
-                    <!-- 統計紀錄由 JS 產生 -->
                 </div>
             </div>
         </div>
@@ -308,7 +306,6 @@
         let isListExpanded = false;
         let currentDisplayCycles = [];
         
-        // PWA 原生安裝變數
         let deferredPrompt;
 
         function init() {
@@ -320,7 +317,6 @@
             document.getElementById('endDate').value = getFormatDate(endOfMonth);
             renderAll();
             
-            // 監聽 PWA 觸發安裝事件
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
@@ -330,7 +326,6 @@
             });
         }
 
-        // 觸發原生 APP 安裝機制
         function installApp() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -427,7 +422,6 @@
                 const record = records[dateStr];
                 const isToday = dateStr === getTodayStr();
                 
-                // 【月曆瘦身】：將高度強制固定，減少佔用空間
                 let btnClass = "relative h-[42px] sm:h-[48px] flex flex-col items-center justify-center rounded-[1rem] border-[3px] transition-transform active:scale-90 font-extrabold ";
                 
                 if (record) {
@@ -464,7 +458,6 @@
             let recordsToDisplay = [];
             cyclesInView.forEach(c => {
                 c.records.forEach(d => {
-                    // ✅ 修正：只有「有填寫備註」的日期才會加進清單
                     if (records[d] && records[d].note && records[d].note.trim() !== '') {
                         recordsToDisplay.push([d, records[d]]);
                     }
@@ -490,8 +483,6 @@
 
             slicedRecords.forEach(([date, data]) => {
                 const statusInfo = STATUS_OPTIONS[data.status];
-                
-                // ✅ 修正：降低欄位高度 (減小 padding、按鈕尺寸與字體微調)
                 listContainer.innerHTML += `
                     <div onclick="openEditModal('${date}')" class="bg-white border-2 border-emerald-200 rounded-[1rem] p-2.5 flex items-start gap-3 shadow-sm cursor-pointer hover:-translate-y-0.5 transition-transform active:scale-[0.98]">
                         <div class="shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center border-2 ${statusInfo.colorClass}">
@@ -525,7 +516,6 @@
             renderAll();
         }
 
-        // 系統提示機制
         let toastTimeout;
         function showCustomToast(msg, icon = '🐍') {
             const toast = document.getElementById('toast');
@@ -535,7 +525,8 @@
             void toast.offsetWidth; 
             toast.classList.add('toast-animate');
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => { toast.classList.add('hidden'); }, 3500);
+            // 修正動畫與隱藏時間為 5500 毫秒 (5.5秒)
+            toastTimeout = setTimeout(() => { toast.classList.add('hidden'); }, 5500);
         }
 
         function getFeedbackMessage(status) {
@@ -582,23 +573,11 @@
             showCustomToast('已經幫你記下來囉！', '✔️');
         }
 
-        // 資料夾視窗
-        function openDataModal() {
-            document.getElementById('dataModal').style.display = 'flex';
-        }
+        function openDataModal() { document.getElementById('dataModal').style.display = 'flex'; }
+        function closeDataModal() { document.getElementById('dataModal').style.display = 'none'; }
 
-        function closeDataModal() {
-            document.getElementById('dataModal').style.display = 'none';
-        }
-
-        // 刪除防呆邏輯
-        function openConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
-        }
+        function openConfirmModal() { document.getElementById('confirmModal').style.display = 'flex'; }
+        function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
         function executeDelete() {
             delete records[editingDate];
@@ -611,7 +590,6 @@
 
         function saveToLocal() { localStorage.setItem('period_records', JSON.stringify(records)); }
 
-        // 醫生報告與圖表
         function openStatsModal() {
             const modal = document.getElementById('statsModal');
             const content = document.getElementById('statsModalContent');
@@ -723,7 +701,6 @@
             });
         }
 
-        // 特殊備註彈出邏輯
         function openSpecialNoteModal(index) {
             const cycle = currentDisplayCycles[index];
             const contentDiv = document.getElementById('specialNoteContent');
@@ -752,7 +729,6 @@
 
         function closeSpecialNoteModal() { document.getElementById('specialNoteModal').style.display = 'none'; }
 
-        // 檔案處理與提示
         function handleExport() {
             if(Object.keys(records).length === 0) { 
                 showCustomToast('目前還沒有紀錄喔！', '❌'); 
