@@ -7,12 +7,12 @@
     <meta name="theme-color" content="#6ee7b7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="小蛇月經紀錄本">
+    <meta name="apple-mobile-web-app-title" content="蛇蛇月經紀錄本">
     
-    <title>小蛇月經紀錄本</title>
+    <title>蛇蛇月經紀錄本</title>
     
     <!-- 內建 App Manifest，讓 Android 可以原生安裝 -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E5%B0%8F%E8%9B%87%E6%9C%88%E7%B6%93%E7%B4%80%E9%8C%84%E6%9C%AC%22%2C%22short_name%22%3A%22%E5%B0%8F%E8%9B%87%E7%B4%80%E9%8C%84%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23e8f5e9%22%2C%22theme_color%22%3A%22%236ee7b7%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bcharset%3Dutf8%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%200%20100%20100%27%253E%253Ctext%2520y%3D%27.9em%27%2520font-size%3D%2790%27%253E%25F0%259F%2590%258D%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D" />
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E8%9B%87%E8%9B%87%E6%9C%88%E7%B6%93%E7%B4%80%E9%8C%84%E6%9C%AC%22%2C%22short_name%22%3A%22%E8%9B%87%E8%9B%87%E7%B4%80%E9%8C%84%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23e8f5e9%22%2C%22theme_color%22%3A%22%236ee7b7%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bcharset%3Dutf8%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%200%20100%20100%27%253E%253Ctext%2520y%3D%27.9em%27%2520font-size%3D%2790%27%253E%25F0%259F%2590%258D%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D" />
 
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,7 +84,7 @@
             <div class="flex justify-between items-center mb-3 pl-4 pt-2">
                 <h1 class="text-xl sm:text-2xl font-extrabold flex items-center gap-1.5 tracking-wide text-[#064e3b] truncate">
                     <span class="text-2xl shrink-0">🐍</span>
-                    <span class="truncate">小蛇紀錄本</span>
+                    <span class="truncate">蛇蛇月經紀錄本</span>
                 </h1>
                 <div class="flex gap-2 relative z-30 shrink-0">
                     <!-- App 原生安裝按鈕 -->
@@ -116,7 +116,7 @@
 
         <!-- === 上半部：月曆區塊 === -->
         <div class="p-3 shrink-0 z-0">
-            <div class="bg-white border-4 border-emerald-400 rounded-3xl p-2 book-shadow-sm relative">
+            <div id="calendarContainer" class="bg-white border-4 border-emerald-400 rounded-3xl p-2 book-shadow-sm relative">
                 <div class="grid grid-cols-7 gap-1 mb-1.5">
                     <div class="text-center font-extrabold text-emerald-700 text-sm">一</div>
                     <div class="text-center font-extrabold text-emerald-700 text-sm">二</div>
@@ -236,7 +236,7 @@
             <div class="p-4 flex justify-between items-center border-b-4 border-emerald-200 shrink-0 bg-white rounded-t-[2.2rem]">
                 <h3 class="text-xl font-extrabold text-emerald-900 flex items-center gap-2">
                     <span class="text-2xl">🏥</span>
-                    給醫生的蛇蛇報告
+                    給醫生的經期紀錄
                 </h3>
                 <button onclick="closeStatsModal()" class="w-9 h-9 bg-emerald-100 rounded-full text-emerald-800 hover:bg-emerald-200 flex items-center justify-center font-bold border-2 border-emerald-200">✕</button>
             </div>
@@ -327,6 +327,19 @@
         
         let deferredPrompt;
 
+        // 滑動偵測變數
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        // 新增：可愛小蛇變裝陣列
+        const cuteSnakes = [
+            "🐍", "🐍✨", "🐍🌸", "🐍🌿", "🐍🎀", 
+            "🐍💤", "🐍💖", "🐍👑", "🐍💝", "🐍🎈", 
+            "🐍🍼", "🐍🌻", "🐍🍎", "🐍☔"
+        ];
+
         function init() {
             const today = new Date();
             const sixMonthsAgo = new Date();
@@ -343,6 +356,35 @@
                 installBtn.classList.remove('hidden');
                 installBtn.classList.add('flex');
             });
+
+            // 綁定行事曆滑動切換月份事件
+            const calendarContainer = document.getElementById('calendarContainer');
+            calendarContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
+            }, {passive: true});
+
+            calendarContainer.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                touchEndY = e.changedTouches[0].screenY;
+                handleSwipe();
+            }, {passive: true});
+        }
+
+        // 判斷滑動方向並執行
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const threshold = 40; // 觸發滑動的最小距離 (px)
+
+            // 確保水平滑動幅度大於垂直滑動，避免跟上下捲動衝突
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
+                if (deltaX > 0) {
+                    changeMonth(-1); // 向右滑，上個月
+                } else {
+                    changeMonth(1);  // 向左滑，下個月
+                }
+            }
         }
 
         function installApp() {
@@ -578,7 +620,9 @@
         function selectStatus(statusId) {
             currentStatus = statusId;
             updateStatusButtonsUI();
-            showCustomToast(getFeedbackMessage(statusId), '🐍');
+            // 隨機抽取一隻造型小蛇
+            const randomSnake = cuteSnakes[Math.floor(Math.random() * cuteSnakes.length)];
+            showCustomToast(getFeedbackMessage(statusId), randomSnake);
         }
 
         function updateStatusButtonsUI() {
