@@ -292,12 +292,31 @@
             special: { id: 'special', label: '特殊', colorClass: 'bg-amber-400 border-amber-600 text-amber-950' }
         };
 
-        const nPrefix = ["嘶嘶～", "親愛的，", "老婆辛苦啦！", "摸摸頭～", "小蛇來報到！", "呼呼～", "寶貝，", "哎呀，", "嘿嘿，", "乖乖～"];
-        const nBody = ["喝點溫水暖暖肚子喔！", "今天也要把你寵上天！", "不舒服就盡情使喚老公吧！", "給你一個大大的擁抱！", "想吃什麼甜點？老公去買！", "肚子痛痛飛走囉！", "今天你是女王，什麼都不用做！", "多休息，別累壞了喔！", "不管量多量少，老公都愛你！", "小蛇為你施展魔法！"];
-        const nSuffix = ["🐍💚", "✨", "🥰"];
-        const sPrefix = ["哎呀！怎麼了？", "老婆沒事吧？", "小蛇很擔心捏...", "心疼老婆...", "怎麼會這樣～"];
-        const sBody = ["有不舒服一定要跟我說喔！", "隨時待命帶你去看醫生！", "別怕，我一直都在你身邊！", "這幾天我會好好照顧你的！", "放下手邊的事休息好嗎？"];
-        const sSuffix = ["🥺", "🐍💦", "🏥", "🫂"];
+        // === 擴充：一般狀態暖心詞庫 ===
+        const nPrefix = [
+            "嘶嘶～", "親愛的，", "老婆辛苦啦！", "摸摸頭～", "小蛇來報到！", "呼呼～", "寶貝，", "哎呀，", "嘿嘿，", "乖乖～",
+            "滴答滴答～", "我的小公主，", "老婆大人，", "辛苦了寶貝！", "抱抱～", "小蛇出動！", "為你加油！", "最愛你了，", "今天好嗎？", "我的心肝寶貝，"
+        ];
+        const nBody = [
+            "喝點溫水暖暖肚子喔！", "今天也要把你寵上天！", "不舒服就盡情使喚老公吧！", "給你一個大大的擁抱！", "想吃什麼甜點？老公去買！",
+            "肚子痛痛飛走囉！", "今天你是女王，什麼都不用做！", "多休息，別累壞了喔！", "不管量多量少，老公都愛你！", "小蛇為你施展魔法！",
+            "想吃巧克力嗎？我準備好了！", "家事放著我來就好！", "快去躺好，我幫你拿熱水袋！", "想看什麼劇？我陪你！", "今天就當個廢物小天才吧！",
+            "不要勉強自己喔！", "有我在，什麼都不用擔心！", "幫你揉揉肚子好不好？", "老婆的笑容由我來守護！", "就算脾氣暴躁也覺得你可愛！",
+            "買了你最愛喝的熱飲！", "今天想吃什麼大餐？我請客！", "辛苦的這幾天，就盡情撒嬌吧！", "想睡就多睡一點，我幫你蓋被子！", "你的健康比什麼都重要！"
+        ];
+        const nSuffix = ["🐍💚", "✨", "🥰", "💖", "😘", "☕", "🍫", "💪", "💕", "🧸"];
+
+        // === 擴充：特殊狀態擔憂/支持詞庫 ===
+        const sPrefix = [
+            "哎呀！怎麼了？", "老婆沒事吧？", "小蛇很擔心捏...", "心疼老婆...", "怎麼會這樣～",
+            "天哪！", "怎麼那麼不舒服？", "老婆還好嗎？", "心揪了一下...", "小蛇緊張！", "老公好心疼...", "讓我看看！"
+        ];
+        const sBody = [
+            "有不舒服一定要跟我說喔！", "隨時待命帶你去看醫生！", "別怕，我一直都在你身邊！", "這幾天我會好好照顧你的！", "放下手邊的事休息好嗎？",
+            "我們現在就去掛號看醫生！", "哪裡不舒服指給我看！", "不要硬撐，一定要說出來喔！", "老公馬上請假回家陪你！", "熱水袋已經準備好了，快敷著！",
+            "是不是吃錯東西了？老公幫你揉揉！", "接下來幾天你什麼都不准做！", "我去找醫生叔叔幫忙！", "乖，閉上眼睛休息一下！", "要不要吃止痛藥？我幫你拿！"
+        ];
+        const sSuffix = ["🥺", "🐍💦", "🏥", "🫂", "🚑", "💊", "😭", "💔"];
 
         let currentDate = new Date();
         let records = JSON.parse(localStorage.getItem('period_records')) || {};
@@ -529,9 +548,16 @@
             toastTimeout = setTimeout(() => { toast.classList.add('hidden'); }, 5500);
         }
 
+        // 修改：使用 array.length 動態隨機抽取，讓詞庫可以無限擴充不會出錯
         function getFeedbackMessage(status) {
-            if(status === 'special') return sPrefix[Math.floor(Math.random()*5)] + sBody[Math.floor(Math.random()*5)] + sSuffix[Math.floor(Math.random()*4)];
-            return nPrefix[Math.floor(Math.random()*10)] + nBody[Math.floor(Math.random()*10)] + nSuffix[Math.floor(Math.random()*3)];
+            if(status === 'special') {
+                return sPrefix[Math.floor(Math.random() * sPrefix.length)] + 
+                       sBody[Math.floor(Math.random() * sBody.length)] + 
+                       sSuffix[Math.floor(Math.random() * sSuffix.length)];
+            }
+            return nPrefix[Math.floor(Math.random() * nPrefix.length)] + 
+                   nBody[Math.floor(Math.random() * nBody.length)] + 
+                   nSuffix[Math.floor(Math.random() * nSuffix.length)];
         }
 
         function openEditModal(dateStr) {
