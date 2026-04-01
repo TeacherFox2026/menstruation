@@ -58,17 +58,12 @@
             100% { transform: translateY(-100%); opacity: 0; }
         }
         .toast-animate {
-            /* 修正動畫時間為 5.5 秒 */
             animation: slideDown 5.5s ease-in-out forwards;
         }
 
-        /* 新增：月份切換滑動動畫 */
-        .slide-left {
-            animation: slideLeftAnim 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
-        .slide-right {
-            animation: slideRightAnim 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
+        /* 月份切換滑動動畫 */
+        .slide-left { animation: slideLeftAnim 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .slide-right { animation: slideRightAnim 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes slideLeftAnim {
             0% { opacity: 0; transform: translateX(30px); }
             100% { opacity: 1; transform: translateX(0); }
@@ -85,7 +80,7 @@
     <div id="toast" class="fixed top-safe left-0 right-0 z-[100] flex justify-center pointer-events-none hidden mt-4">
         <div class="bg-white border-4 border-emerald-400 rounded-3xl p-3 px-5 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex items-center gap-3 max-w-[90%] book-shadow-sm">
             <span id="toastIcon" class="text-3xl floating">🐍</span>
-            <!-- 修改：文字大幅加粗、放大，並增加字距 -->
+            <!-- 文字大幅加粗、放大，並增加字距 -->
             <p id="toastText" class="text-emerald-800 font-extrabold text-lg sm:text-xl leading-snug tracking-wide"></p>
         </div>
     </div>
@@ -96,7 +91,7 @@
         <div class="absolute top-3 left-3 text-2xl floating opacity-80 z-20 pointer-events-none">🌿</div>
         <div class="absolute top-10 right-3 text-xl floating opacity-70 z-20 pointer-events-none" style="animation-delay: 1.5s;">🍃</div>
 
-        <!-- === 標頭區塊 (加上 sticky 吸附功能，避免往上滑時工具列消失) === -->
+        <!-- === 標頭區塊 (加上 sticky 吸附功能) === -->
         <div class="sticky top-0 z-40 bg-[#fdfbf7]">
             <header class="bg-[#6ee7b7] text-emerald-900 p-3 pt-safe rounded-b-[2rem] book-shadow shrink-0 relative border-b-4 border-emerald-500">
                 <div class="flex justify-between items-center mb-3 pl-4 pt-2">
@@ -115,6 +110,7 @@
                             <i class="fa-solid fa-folder-open"></i>
                         </button>
                         
+                        <!-- 醫生統計報表按鈕 -->
                         <button onclick="openStatsModal()" class="w-9 h-9 bg-white/70 rounded-full flex items-center justify-center hover:bg-white transition text-emerald-800 active:scale-90 border-2 border-emerald-300 shadow-sm">
                             <i class="fa-solid fa-chart-bar"></i>
                         </button>
@@ -153,14 +149,21 @@
             </div>
         </div>
 
-        <!-- === 下半部：紀錄列表區塊 (移除強制捲動，改為自然延伸) === -->
+        <!-- === 下半部：紀錄列表區塊 (自然延伸不強制捲動) === -->
         <div class="flex-1 bg-[#f0fdf4] p-4 rounded-t-[2.5rem] border-t-4 border-x-4 border-emerald-400 flex flex-col shadow-[0_-4px_10px_rgba(0,0,0,0.05)] mx-[-4px]">
             <h2 class="text-lg font-extrabold text-emerald-900 mb-3 flex items-center gap-2 shrink-0">
                 <span class="bg-emerald-200 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-sm">📖</span>
                 蛇蛇小本本 <span class="text-sm text-emerald-600 font-bold ml-1">(完整週期)</span>
             </h2>
-            <div id="recordList" class="space-y-3 pb-safe pr-1 pb-8">
+            
+            <div id="recordList" class="space-y-3 pr-1">
                 <!-- 由 JS 動態產生 -->
+            </div>
+
+            <!-- === 右下角作者標示 === -->
+            <div class="mt-auto pt-10 pb-6 text-right flex items-center justify-end gap-1.5">
+                <span class="text-[11px] sm:text-xs font-extrabold text-emerald-600/50 tracking-wider">Made by TeacherFox</span>
+                <span class="text-lg opacity-70">🦊</span>
             </div>
         </div>
 
@@ -277,6 +280,7 @@
                 </div>
 
                 <div id="statsList" class="flex-1 overflow-y-auto space-y-2 pb-safe pr-1 pb-8">
+                    <!-- 統計紀錄由 JS 產生 -->
                 </div>
             </div>
         </div>
@@ -311,7 +315,6 @@
             special: { id: 'special', label: '特殊', colorClass: 'bg-amber-400 border-amber-600 text-amber-950' }
         };
 
-        // === 擴充：一般狀態暖心詞庫 ===
         const nPrefix = [
             "嘶嘶～", "親愛的，", "老婆辛苦啦！", "摸摸頭～", "小蛇來報到！", "呼呼～", "寶貝，", "哎呀，", "嘿嘿，", "乖乖～",
             "滴答滴答～", "我的小公主，", "老婆大人，", "辛苦了寶貝！", "抱抱～", "小蛇出動！", "為你加油！", "最愛你了，", "今天好嗎？", "我的心肝寶貝，"
@@ -325,7 +328,6 @@
         ];
         const nSuffix = ["🐍💚", "✨", "🥰", "💖", "😘", "☕", "🍫", "💪", "💕", "🧸"];
 
-        // === 擴充：特殊狀態擔憂/支持詞庫 ===
         const sPrefix = [
             "哎呀！怎麼了？", "老婆沒事吧？", "小蛇很擔心捏...", "心疼老婆...", "怎麼會這樣～",
             "天哪！", "怎麼那麼不舒服？", "老婆還好嗎？", "心揪了一下...", "小蛇緊張！", "老公好心疼...", "讓我看看！"
@@ -383,19 +385,13 @@
             }, {passive: true});
         }
 
-        // 判斷滑動方向並執行
         function handleSwipe() {
             const deltaX = touchEndX - touchStartX;
             const deltaY = touchEndY - touchStartY;
-            const threshold = 40; // 觸發滑動的最小距離 (px)
-
-            // 確保水平滑動幅度大於垂直滑動，避免跟上下捲動衝突
+            const threshold = 40; 
             if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
-                if (deltaX > 0) {
-                    changeMonth(-1); // 向右滑，上個月
-                } else {
-                    changeMonth(1);  // 向左滑，下個月
-                }
+                if (deltaX > 0) changeMonth(-1); // 向右滑，上個月
+                else changeMonth(1);  // 向左滑，下個月
             }
         }
 
@@ -458,7 +454,6 @@
             return cycles;
         }
 
-        // 修改：傳入 delta 以判定動畫方向
         function changeMonth(delta) {
             currentDate.setMonth(currentDate.getMonth() + delta);
             isListExpanded = false;
@@ -483,15 +478,11 @@
             const firstDay = firstDayRaw === 0 ? 6 : firstDayRaw - 1; 
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             
-            // 新增：加入月曆轉場動畫
             const calendarContainer = document.getElementById('calendarContainer');
             calendarContainer.classList.remove('slide-left', 'slide-right');
             void calendarContainer.offsetWidth; // 觸發重繪
-            if (delta > 0) {
-                calendarContainer.classList.add('slide-left');
-            } else if (delta < 0) {
-                calendarContainer.classList.add('slide-right');
-            }
+            if (delta > 0) calendarContainer.classList.add('slide-left');
+            else if (delta < 0) calendarContainer.classList.add('slide-right');
 
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
@@ -609,20 +600,12 @@
             void toast.offsetWidth; 
             toast.classList.add('toast-animate');
             clearTimeout(toastTimeout);
-            // 修正動畫與隱藏時間為 5500 毫秒 (5.5秒)
             toastTimeout = setTimeout(() => { toast.classList.add('hidden'); }, 5500);
         }
 
-        // 修改：使用 array.length 動態隨機抽取，讓詞庫可以無限擴充不會出錯
         function getFeedbackMessage(status) {
-            if(status === 'special') {
-                return sPrefix[Math.floor(Math.random() * sPrefix.length)] + 
-                       sBody[Math.floor(Math.random() * sBody.length)] + 
-                       sSuffix[Math.floor(Math.random() * sSuffix.length)];
-            }
-            return nPrefix[Math.floor(Math.random() * nPrefix.length)] + 
-                   nBody[Math.floor(Math.random() * nBody.length)] + 
-                   nSuffix[Math.floor(Math.random() * nSuffix.length)];
+            if(status === 'special') return sPrefix[Math.floor(Math.random()*sPrefix.length)] + sBody[Math.floor(Math.random()*sBody.length)] + sSuffix[Math.floor(Math.random()*sSuffix.length)];
+            return nPrefix[Math.floor(Math.random()*nPrefix.length)] + nBody[Math.floor(Math.random()*nBody.length)] + nSuffix[Math.floor(Math.random()*nSuffix.length)];
         }
 
         function openEditModal(dateStr) {
@@ -640,7 +623,6 @@
 
         function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
 
-        // 修改：刪除隨機變裝蛇，回歸經典小蛇
         function selectStatus(statusId) {
             currentStatus = statusId;
             updateStatusButtonsUI();
@@ -855,3 +837,5 @@
     </script>
 </body>
 </html>
+
+
