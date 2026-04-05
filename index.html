@@ -2,7 +2,6 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- PWA 與手機最佳化設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#6ee7b7">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,16 +10,11 @@
     
     <title>蛇蛇月經紀錄本</title>
     
-    <!-- 內建 App Manifest，讓 Android 可以原生安裝 -->
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E8%9B%87%E8%9B%87%E6%9C%88%E7%B6%93%E7%B4%80%E9%8C%84%E6%9C%AC%22%2C%22short_name%22%3A%22%E8%9B%87%E8%9B%87%E7%B4%80%E9%8C%84%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23e8f5e9%22%2C%22theme_color%22%3A%22%236ee7b7%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bcharset%3Dutf8%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%200%20100%20100%27%253E%253Ctext%2520y%3D%27.9em%27%2520font-size%3D%2790%27%253E%25F0%259F%2590%258D%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D" />
 
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 FontAwesome 圖示 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- 引入可愛圓潤字體 -->
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
-    <!-- 引入 Chart.js 動態圖表庫 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -38,60 +32,35 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #6ee7b7; border-radius: 10px; }
         
-        @keyframes popIn {
-            0% { transform: scale(0.9); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .modal-animate { animation: popIn 0.2s ease-out forwards; }
         
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-6px) rotate(5deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
+        @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-6px) rotate(5deg); } 100% { transform: translateY(0px) rotate(0deg); } }
         .floating { animation: float 3.5s ease-in-out infinite; }
 
-        @keyframes slideDown {
-            0% { transform: translateY(-100%); opacity: 0; }
-            10% { transform: translateY(0); opacity: 1; }
-            90% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100%); opacity: 0; }
-        }
-        .toast-animate {
-            animation: slideDown 5.5s ease-in-out forwards;
-        }
+        @keyframes slideDown { 0% { transform: translateY(-100%); opacity: 0; } 10% { transform: translateY(0); opacity: 1; } 90% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100%); opacity: 0; } }
+        .toast-animate { animation: slideDown 5.5s ease-in-out forwards; }
 
-        /* 月份切換滑動動畫 */
         .slide-left { animation: slideLeftAnim 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         .slide-right { animation: slideRightAnim 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-        @keyframes slideLeftAnim {
-            0% { opacity: 0; transform: translateX(30px); }
-            100% { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes slideRightAnim {
-            0% { opacity: 0; transform: translateX(-30px); }
-            100% { opacity: 1; transform: translateX(0); }
-        }
+        @keyframes slideLeftAnim { 0% { opacity: 0; transform: translateX(30px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes slideRightAnim { 0% { opacity: 0; transform: translateX(-30px); } 100% { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body class="flex justify-center text-gray-800">
 
-    <!-- === 全域通用浮動提示 === -->
     <div id="toast" class="fixed top-safe left-0 right-0 z-[100] flex justify-center pointer-events-none hidden mt-4">
         <div class="bg-white border-4 border-emerald-400 rounded-3xl p-3 px-5 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex items-center gap-3 max-w-[90%] book-shadow-sm">
             <span id="toastIcon" class="text-3xl floating">🐍</span>
-            <!-- 文字大幅加粗、放大，並增加字距 -->
             <p id="toastText" class="text-emerald-800 font-extrabold text-lg sm:text-xl leading-snug tracking-wide"></p>
         </div>
     </div>
 
-    <!-- 手機版面容器 (改為 min-h 允許整頁自然滾動) -->
     <div class="w-full max-w-md bg-[#fdfbf7] min-h-[100dvh] flex flex-col border-x-4 border-emerald-400 shadow-2xl relative">
         
         <div class="absolute top-3 left-3 text-2xl floating opacity-80 z-20 pointer-events-none">🌿</div>
         <div class="absolute top-10 right-3 text-xl floating opacity-70 z-20 pointer-events-none" style="animation-delay: 1.5s;">🍃</div>
 
-        <!-- === 標頭區塊 (加上 sticky 吸附功能) === -->
         <div class="sticky top-0 z-40 bg-[#fdfbf7]">
             <header class="bg-[#6ee7b7] text-emerald-900 p-3 pt-safe rounded-b-[2rem] book-shadow shrink-0 relative border-b-4 border-emerald-500">
                 <div class="flex justify-between items-center mb-3 pl-4 pt-2">
@@ -100,17 +69,12 @@
                         <span class="truncate">蛇蛇月經紀錄本</span>
                     </h1>
                     <div class="flex gap-2 relative z-30 shrink-0">
-                        <!-- App 原生安裝按鈕 -->
                         <button id="installBtn" onclick="installApp()" class="hidden w-auto px-3 h-9 bg-pink-100 rounded-full items-center justify-center hover:bg-pink-200 transition text-pink-700 font-extrabold active:scale-90 border-2 border-pink-300 shadow-sm gap-1 text-sm">
                             <i class="fa-solid fa-download"></i> 安裝
                         </button>
-                        
-                        <!-- 整合的資料管理按鈕 -->
                         <button onclick="openDataModal()" class="w-9 h-9 bg-white/70 rounded-full flex items-center justify-center hover:bg-white transition text-emerald-800 active:scale-90 border-2 border-emerald-300 shadow-sm">
                             <i class="fa-solid fa-folder-open"></i>
                         </button>
-                        
-                        <!-- 醫生統計報表按鈕 -->
                         <button onclick="openStatsModal()" class="w-9 h-9 bg-white/70 rounded-full flex items-center justify-center hover:bg-white transition text-emerald-800 active:scale-90 border-2 border-emerald-300 shadow-sm">
                             <i class="fa-solid fa-chart-bar"></i>
                         </button>
@@ -129,7 +93,6 @@
             </header>
         </div>
 
-        <!-- === 上半部：月曆區塊 === -->
         <div class="p-3 shrink-0 z-0">
             <div id="calendarContainer" class="bg-white border-4 border-emerald-400 rounded-3xl p-2 book-shadow-sm relative">
                 <div class="grid grid-cols-7 gap-1 mb-1.5">
@@ -144,23 +107,18 @@
                 <div id="calendarGrid" class="grid grid-cols-7 gap-x-1 gap-y-1.5"></div>
                 
                 <div id="cycleSummary" class="mt-2 text-center text-xs sm:text-sm font-extrabold text-emerald-800 bg-[#f0fdf4] rounded-xl py-1.5 border-[3px] border-dashed border-emerald-300">
-                    <!-- JS 動態產生完整週期統計 -->
                 </div>
             </div>
         </div>
 
-        <!-- === 下半部：紀錄列表區塊 (自然延伸不強制捲動) === -->
         <div class="flex-1 bg-[#f0fdf4] p-4 rounded-t-[2.5rem] border-t-4 border-x-4 border-emerald-400 flex flex-col shadow-[0_-4px_10px_rgba(0,0,0,0.05)] mx-[-4px]">
             <h2 class="text-lg font-extrabold text-emerald-900 mb-3 flex items-center gap-2 shrink-0">
                 <span class="bg-emerald-200 w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-sm">📖</span>
                 蛇蛇小本本 <span class="text-sm text-emerald-600 font-bold ml-1">(完整週期)</span>
             </h2>
             
-            <div id="recordList" class="space-y-3 pr-1">
-                <!-- 由 JS 動態產生 -->
-            </div>
+            <div id="recordList" class="space-y-3 pr-1"></div>
 
-            <!-- === 右下角作者標示 === -->
             <div class="mt-auto pt-10 pb-6 text-right flex items-center justify-end gap-1.5">
                 <span class="text-[11px] sm:text-xs font-extrabold text-emerald-600/50 tracking-wider">Made by TeacherFox</span>
                 <span class="text-lg opacity-70">🦊</span>
@@ -169,15 +127,12 @@
 
     </div>
 
-    <!-- === 彈出視窗：資料夾管理 (匯入/匯出) === -->
+    <!-- === 彈出視窗：資料管理 === -->
     <div id="dataModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex-col items-center justify-center p-4">
         <div class="bg-white w-full max-w-[280px] rounded-[2.5rem] border-4 border-emerald-400 book-shadow p-6 modal-animate relative text-center">
             <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-5xl floating">📦</div>
-            
             <h3 class="text-xl font-extrabold text-emerald-900 mb-4 mt-4">資料管理</h3>
-            
             <input type="file" id="importFileReal" accept=".json" class="hidden" onchange="handleImport(event)">
-            
             <div class="space-y-3">
                 <button onclick="document.getElementById('importFileReal').click(); closeDataModal();" class="w-full py-3.5 bg-emerald-50 text-emerald-800 font-extrabold rounded-2xl border-b-4 border-emerald-200 active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-import text-lg"></i> 匯入舊備份
@@ -204,21 +159,33 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-extrabold text-emerald-800 mb-2">今天感覺怎麼樣呢？🌿</label>
-                    <div class="grid grid-cols-2 gap-2" id="statusButtons">
-                        <button onclick="selectStatus('light')" id="btn-light" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">💧 量少</button>
-                        <button onclick="selectStatus('normal')" id="btn-normal" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">😊 正常</button>
-                        <button onclick="selectStatus('heavy')" id="btn-heavy" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">🌊 量多</button>
-                        <button onclick="selectStatus('special')" id="btn-special" class="status-btn py-3 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95">⚠️ 特殊</button>
+                    <label class="block text-sm font-extrabold text-emerald-800 mb-2">今天流血狀況？🌿</label>
+                    <div class="grid grid-cols-6 gap-2" id="statusButtons">
+                        <button onclick="selectStatus('light')" id="btn-light" class="status-btn py-2.5 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95 col-span-2 text-sm px-1">💧 量少</button>
+                        <button onclick="selectStatus('normal')" id="btn-normal" class="status-btn py-2.5 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95 col-span-2 text-sm px-1">😊 正常</button>
+                        <button onclick="selectStatus('heavy')" id="btn-heavy" class="status-btn py-2.5 rounded-2xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95 col-span-2 text-sm px-1">🌊 量多</button>
+                        
+                        <button onclick="selectStatus('special')" id="btn-special" class="status-btn py-2.5 rounded-xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95 col-span-3 text-[13px] sm:text-sm mt-1">🩸 特殊 (有月經)</button>
+                        <button onclick="selectStatus('special_no_flow')" id="btn-special_no_flow" class="status-btn py-2.5 rounded-xl font-extrabold border-4 bg-gray-50 border-gray-200 text-gray-500 transition-transform active:scale-95 col-span-3 text-[13px] sm:text-sm mt-1">⚠️ 特殊 (無月經)</button>
+                    </div>
+                </div>
+
+                <div class="mt-2 p-3 bg-emerald-50 rounded-2xl border-[3px] border-emerald-200 flex justify-between items-center cursor-pointer active:scale-95 transition-transform" onclick="toggleMeds()">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">💊</span>
+                        <span class="font-extrabold text-emerald-900 tracking-wide">今天乖乖吃藥了嗎？</span>
+                    </div>
+                    <div id="medsToggleBg" class="w-[3.25rem] h-7 bg-gray-300 rounded-full relative transition-colors duration-300 shadow-inner">
+                        <div id="medsKnob" class="w-6 h-6 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow-md"></div>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-extrabold text-emerald-800 mb-2">寫點什麼吧 (選填) ✏️</label>
-                    <textarea id="noteInput" rows="3" placeholder="想吃甜的、肚子悶悶..." class="w-full bg-[#f8fafc] border-4 border-emerald-200 rounded-2xl p-3 text-gray-800 font-bold focus:outline-none focus:border-emerald-400 resize-none"></textarea>
+                    <label class="block text-sm font-extrabold text-emerald-800 mb-2 mt-1">寫點什麼吧 (選填) ✏️</label>
+                    <textarea id="noteInput" rows="2" placeholder="想吃甜的、肚子悶悶..." class="w-full bg-[#f8fafc] border-4 border-emerald-200 rounded-2xl p-3 text-gray-800 font-bold focus:outline-none focus:border-emerald-400 resize-none"></textarea>
                 </div>
 
-                <div class="flex gap-2 pt-2">
+                <div class="flex gap-2 pt-1">
                     <button id="deleteBtn" onclick="openConfirmModal()" class="flex-1 flex justify-center items-center gap-1 py-3 bg-red-50 text-red-600 font-extrabold rounded-2xl border-b-4 border-red-300 active:translate-y-1 active:border-b-0 transition-all hidden">
                         🗑️ 刪除
                     </button>
@@ -234,37 +201,35 @@
     <div id="confirmModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex-col items-center justify-center p-4">
         <div class="bg-white w-full max-w-[300px] rounded-[2rem] border-4 border-red-400 book-shadow p-6 modal-animate relative text-center">
             <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-5xl floating">🥺</div>
-            
             <h3 class="text-xl font-extrabold text-red-600 mb-2 mt-4">溫馨提醒 🐍</h3>
-            <p class="text-gray-700 font-bold mb-6 text-sm leading-relaxed">
-                親愛的，確定要刪除這天的紀錄嗎？<br>擦掉的話就找不回來囉！
-            </p>
-            
+            <p class="text-gray-700 font-bold mb-6 text-sm leading-relaxed">親愛的，確定要刪除這天的紀錄嗎？<br>擦掉的話就找不回來囉！</p>
             <div class="flex gap-2">
-                <button onclick="closeConfirmModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-extrabold rounded-2xl border-b-4 border-gray-300 active:translate-y-1 active:border-b-0 transition-all">
-                    取消
-                </button>
-                <button onclick="executeDelete()" class="flex-1 py-3 bg-red-400 text-white font-extrabold rounded-2xl border-b-4 border-red-600 active:translate-y-1 active:border-b-0 transition-all">
-                    確定刪除
-                </button>
+                <button onclick="closeConfirmModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-extrabold rounded-2xl border-b-4 border-gray-300 active:translate-y-1 active:border-b-0 transition-all">取消</button>
+                <button onclick="executeDelete()" class="flex-1 py-3 bg-red-400 text-white font-extrabold rounded-2xl border-b-4 border-red-600 active:translate-y-1 active:border-b-0 transition-all">確定刪除</button>
             </div>
         </div>
     </div>
 
-    <!-- === 彈出視窗：極簡一行式醫生統計報告 + 長條圖 === -->
-    <div id="statsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex-col justify-end">
-        <div class="bg-[#fdfbf7] w-full max-w-md mx-auto h-[90vh] rounded-t-[2.5rem] border-t-4 border-x-4 border-emerald-500 shadow-[0_-8px_0_0_#10b981] flex flex-col transform transition-transform duration-300 translate-y-full" id="statsModalContent">
+    <!-- === 彈出視窗：給醫生的經期紀錄 === -->
+    <div id="statsModal" class="fixed inset-0 z-50 hidden justify-center bg-black/60 backdrop-blur-sm">
+        <div id="statsModalContent" class="w-full max-w-md bg-[#fdfbf7] h-[100dvh] overflow-y-auto flex flex-col shadow-2xl relative border-x-4 border-emerald-400 transform transition-transform duration-300 translate-y-full">
             
-            <div class="p-4 flex justify-between items-center border-b-4 border-emerald-200 shrink-0 bg-white rounded-t-[2.2rem]">
-                <h3 class="text-xl font-extrabold text-emerald-900 flex items-center gap-2">
-                    <span class="text-2xl">🏥</span>
-                    給醫生的經期紀錄
-                </h3>
-                <button onclick="closeStatsModal()" class="w-9 h-9 bg-emerald-100 rounded-full text-emerald-800 hover:bg-emerald-200 flex items-center justify-center font-bold border-2 border-emerald-200">✕</button>
+            <div class="sticky top-0 z-40 bg-[#fdfbf7]">
+                <header class="bg-[#6ee7b7] text-emerald-900 p-3 pt-safe rounded-b-[2rem] book-shadow shrink-0 relative border-b-4 border-emerald-500">
+                    <div class="flex justify-between items-center mb-1 pl-4 pt-2 pb-2">
+                        <h3 class="text-xl sm:text-2xl font-extrabold flex items-center gap-2 text-[#064e3b]">
+                            <span class="text-2xl shrink-0">🏥</span>
+                            <span class="truncate">經期紀錄報表</span>
+                        </h3>
+                        <button onclick="closeStatsModal()" class="w-9 h-9 bg-white/70 rounded-full flex items-center justify-center hover:bg-white transition text-emerald-800 active:scale-90 border-2 border-emerald-300 shadow-sm shrink-0">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+                </header>
             </div>
             
-            <div class="flex-1 min-h-0 flex flex-col bg-[#f0fdf4] p-4">
-                <div class="bg-white p-3 rounded-3xl border-4 border-emerald-300 mb-3 book-shadow-sm shrink-0">
+            <div class="p-4 flex flex-col shrink-0 z-0 gap-3">
+                <div class="bg-white p-3 rounded-3xl border-4 border-emerald-300 book-shadow-sm">
                     <div class="flex items-center gap-2 mb-2">
                         <input type="date" id="startDate" class="flex-1 p-2 rounded-xl border-4 border-emerald-100 text-xs font-bold text-gray-700 focus:outline-none focus:border-emerald-400 bg-gray-50">
                         <span class="text-emerald-500 font-extrabold">~</span>
@@ -275,34 +240,40 @@
                     </button>
                 </div>
 
-                <div id="chartContainer" class="bg-white p-3 rounded-3xl border-4 border-emerald-300 mb-3 book-shadow-sm shrink-0 hidden h-48">
-                    <canvas id="periodChart"></canvas>
+                <div id="statsSummaryBox" class="grid grid-cols-2 gap-3 hidden">
+                    <div class="bg-rose-50 border-[3px] border-rose-200 rounded-2xl p-3 flex flex-col items-center shadow-sm">
+                        <span class="text-xs font-extrabold text-rose-800 mb-1">🩸 月經週期</span>
+                        <div class="text-xl font-extrabold text-rose-600"><span id="statsCycleCount">0</span> <span class="text-sm">次</span></div>
+                    </div>
+                    <div class="bg-emerald-50 border-[3px] border-emerald-200 rounded-2xl p-3 flex flex-col items-center shadow-sm">
+                        <span class="text-xs font-extrabold text-emerald-800 mb-1">💊 服藥總天數</span>
+                        <div class="text-xl font-extrabold text-emerald-600"><span id="statsMedsCount">0</span> <span class="text-sm">天</span></div>
+                    </div>
                 </div>
 
-                <div id="statsList" class="flex-1 overflow-y-auto space-y-2 pb-safe pr-1 pb-8">
-                    <!-- 統計紀錄由 JS 產生 -->
+                <div id="chartContainer" class="bg-white p-3 rounded-3xl border-4 border-emerald-300 book-shadow-sm hidden h-48">
+                    <canvas id="periodChart"></canvas>
                 </div>
+            </div>
+
+            <!-- 下方清單分區：月經週期 / 一般備註 -->
+            <div class="flex-1 bg-[#f0fdf4] p-4 rounded-t-[2.5rem] border-t-4 border-emerald-400 flex flex-col shadow-[0_-4px_10px_rgba(0,0,0,0.05)] mt-1">
+                <div id="statsList" class="pb-safe pb-8"></div>
             </div>
         </div>
     </div>
 
-    <!-- === 彈出視窗：特殊狀況備註詳情 === -->
+    <!-- === 彈出視窗：統一的備註詳情 === -->
     <div id="specialNoteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex-col items-center justify-center p-4">
         <div class="bg-white w-full max-w-[320px] rounded-[2.5rem] border-4 border-amber-400 book-shadow p-6 modal-animate relative">
-            <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-5xl floating">⚠️</div>
-            
+            <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-5xl floating" id="noteModalFloatIcon">📝</div>
             <div class="flex justify-between items-center mb-4 border-b-4 border-amber-100 pb-3 mt-4">
-                <h3 class="text-xl font-extrabold text-amber-900 tracking-wider">週期備註詳情</h3>
+                <h3 class="text-xl font-extrabold text-amber-900 tracking-wider" id="noteModalTitle">備註詳情</h3>
                 <button onclick="closeSpecialNoteModal()" class="w-8 h-8 bg-amber-100 rounded-full text-amber-800 hover:bg-amber-200 flex items-center justify-center font-bold border-2 border-amber-200">✕</button>
             </div>
-
-            <div id="specialNoteContent" class="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
-            </div>
-
+            <div id="specialNoteContent" class="space-y-3 max-h-[40vh] overflow-y-auto pr-1"></div>
             <div class="mt-4 pt-2">
-                <button onclick="closeSpecialNoteModal()" class="w-full flex justify-center items-center py-3 bg-amber-400 text-amber-950 font-extrabold rounded-2xl border-b-4 border-amber-600 active:translate-y-1 active:border-b-0 transition-all">
-                    了解！
-                </button>
+                <button onclick="closeSpecialNoteModal()" class="w-full flex justify-center items-center py-3 bg-amber-400 text-amber-950 font-extrabold rounded-2xl border-b-4 border-amber-600 active:translate-y-1 active:border-b-0 transition-all">了解！</button>
             </div>
         </div>
     </div>
@@ -312,47 +283,32 @@
             light: { id: 'light', label: '量少', colorClass: 'bg-pink-100 border-pink-300 text-pink-700' },
             normal: { id: 'normal', label: '正常', colorClass: 'bg-rose-500 border-rose-700 text-white' },
             heavy: { id: 'heavy', label: '量多', colorClass: 'bg-[#881337] border-[#4c0519] text-white' },
-            special: { id: 'special', label: '特殊', colorClass: 'bg-amber-400 border-amber-600 text-amber-950' }
+            special: { id: 'special', label: '特殊(有)', colorClass: 'bg-orange-500 border-orange-700 text-white' }, 
+            special_no_flow: { id: 'special_no_flow', label: '特殊(無)', colorClass: 'bg-amber-400 border-amber-600 text-amber-950' }
         };
 
-        const nPrefix = [
-            "嘶嘶～", "親愛的，", "老婆辛苦啦！", "摸摸頭～", "小蛇來報到！", "呼呼～", "寶貝，", "哎呀，", "嘿嘿，", "乖乖～",
-            "滴答滴答～", "我的小公主，", "老婆大人，", "辛苦了寶貝！", "抱抱～", "小蛇出動！", "為你加油！", "最愛你了，", "今天好嗎？", "我的心肝寶貝，"
-        ];
-        const nBody = [
-            "喝點溫水暖暖肚子喔！", "今天也要把你寵上天！", "不舒服就盡情使喚老公吧！", "給你一個大大的擁抱！", "想吃什麼甜點？老公去買！",
-            "肚子痛痛飛走囉！", "今天你是女王，什麼都不用做！", "多休息，別累壞了喔！", "不管量多量少，老公都愛你！", "小蛇為你施展魔法！",
-            "想吃巧克力嗎？我準備好了！", "家事放著我來就好！", "快去躺好，我幫你拿熱水袋！", "想看什麼劇？我陪你！", "今天就當個廢物小天才吧！",
-            "不要勉強自己喔！", "有我在，什麼都不用擔心！", "幫你揉揉肚子好不好？", "老婆的笑容由我來守護！", "就算脾氣暴躁也覺得你可愛！",
-            "買了你最愛喝的熱飲！", "今天想吃什麼大餐？我請客！", "辛苦的這幾天，就盡情撒嬌吧！", "想睡就多睡一點，我幫你蓋被子！", "你的健康比什麼都重要！"
-        ];
-        const nSuffix = ["🐍💚", "✨", "🥰", "💖", "😘", "☕", "🍫", "💪", "💕", "🧸"];
+        const nPrefix = ["嘶嘶～", "親愛的，", "老婆辛苦啦！", "摸摸頭～", "小蛇來報到！", "呼呼～", "寶貝，", "哎呀，", "嘿嘿，", "乖乖～", "我的小公主，", "老婆大人，", "抱抱～", "心肝寶貝，", "辛苦的寶貝，", "最愛的妳，", "哈囉老婆～", "仙女寶貝，", "親親老婆，"];
+        const nBody = ["今天也要把你寵上天！", "不舒服就盡情使喚老公吧！", "給你一個大大的擁抱！", "想吃什麼甜點？老公去買！", "肚子痛痛飛走囉！", "今天你是女王，什麼都不用做！", "多休息，別累壞了喔！", "不管量多量少，老公都愛你！", "家事放著我來就好！", "快去躺好，我幫你拿熱水袋！", "想吃什麼大餐？我請客！", "辛苦的這幾天，就盡情撒嬌吧！", "有什麼想買的？老公買單！", "老公給你按按摩好嗎？", "看劇時間到！零食準備好了！", "老婆想做什麼老公都陪你！", "慢慢走，小心別著涼了喔！", "這幾天老公當妳的專屬管家！", "我會一直在妳身邊陪妳的！"];
+        const nSuffix = ["🐍💚", "✨", "🥰", "💖", "😘", "☕", "🍫", "💪", "💕", "🧸", "🫶", "🍰", "🎉", "👑", "🌹"];
 
-        const sPrefix = [
-            "哎呀！怎麼了？", "老婆沒事吧？", "小蛇很擔心捏...", "心疼老婆...", "怎麼會這樣～",
-            "天哪！", "怎麼那麼不舒服？", "老婆還好嗎？", "心揪了一下...", "小蛇緊張！", "老公好心疼...", "讓我看看！"
-        ];
-        const sBody = [
-            "有不舒服一定要跟我說喔！", "隨時待命帶你去看醫生！", "別怕，我一直都在你身邊！", "這幾天我會好好照顧你的！", "放下手邊的事休息好嗎？",
-            "我們現在就去掛號看醫生！", "哪裡不舒服指給我看！", "不要硬撐，一定要說出來喔！", "老公馬上請假回家陪你！", "熱水袋已經準備好了，快敷著！",
-            "是不是吃錯東西了？老公幫你揉揉！", "接下來幾天你什麼都不准做！", "我去找醫生叔叔幫忙！", "乖，閉上眼睛休息一下！", "要不要吃止痛藥？我幫你拿！"
-        ];
-        const sSuffix = ["🥺", "🐍💦", "🏥", "🫂", "🚑", "💊", "😭", "💔"];
+        const sPrefix = ["哎呀！怎麼了？", "老婆沒事吧？", "小蛇很擔心捏...", "心疼老婆...", "怎麼會這樣～", "天哪！", "怎麼那麼不舒服？", "心揪了一下...", "看你這樣我好心疼...", "老婆還好嗎？", "嗚嗚嗚怎麼了？", "親愛的撐住！"];
+        const sBody = ["有不舒服一定要跟我說喔！", "隨時待命帶你去看醫生！", "別怕，我一直都在你身邊！", "這幾天我會好好照顧你的！", "放下手邊的事休息好嗎？", "我們現在就去掛號看醫生！", "哪裡不舒服指給我看！", "不要硬撐，一定要說出來喔！", "熱水袋準備好了，快敷著！", "老公幫你呼呼～", "有沒有好一點了？", "要不要吃點止痛藥？", "請假在家好好躺著吧！", "我馬上去幫你泡熱可可！"];
+        const sSuffix = ["🥺", "🐍💦", "🏥", "🫂", "🚑", "💊", "😭", "🩹", "😰", "💧", "❤️‍🩹"];
+
+        const mPrefix = ["乖寶寶！", "太棒了！", "老婆好乖～", "摸摸頭！", "給妳一個讚！", "我的小仙女，", "老婆最棒！", "親親！", "好棒喔！", "小乖乖，", "我的心肝，", "超棒的！", "乖乖老婆，"];
+        const mBody = ["今天也有乖乖吃藥！", "按時吃藥，身體快快好喔！", "藥藥吃下肚，病痛飛走囉！", "吃藥辛苦了，給你呼呼～", "都有記得吃藥，最棒了！", "老婆超棒，獎勵一個抱抱！", "吃完藥趕快去休息喔！", "有乖乖聽醫生的話，好棒！", "吞藥藥辛苦了，給你吃糖糖！", "今天又完成吃藥任務啦！", "身體一定會越來越健康的！", "老公陪妳一起加油！", "乖乖吃藥的樣子最可愛了！", "好厲害！都有乖乖記得！"];
+        const mSuffix = ["💊", "✨", "🥰", "👍", "💚", "😘", "🙌", "🍬", "🩺", "💪", "🎉", "🧸"];
 
         let currentDate = new Date();
         let records = JSON.parse(localStorage.getItem('period_records')) || {};
         let editingDate = null;
-        let currentStatus = null;
+        let currentStatus = null; 
+        let currentTookMeds = false; 
         let isListExpanded = false;
         let currentDisplayCycles = [];
         
         let deferredPrompt;
-
-        // 滑動偵測變數
-        let touchStartX = 0;
-        let touchEndX = 0;
-        let touchStartY = 0;
-        let touchEndY = 0;
+        let touchStartX = 0, touchEndX = 0, touchStartY = 0, touchEndY = 0;
 
         function init() {
             const today = new Date();
@@ -371,16 +327,12 @@
                 installBtn.classList.add('flex');
             });
 
-            // 綁定行事曆滑動切換月份事件
             const calendarContainer = document.getElementById('calendarContainer');
             calendarContainer.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-                touchStartY = e.changedTouches[0].screenY;
+                touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY;
             }, {passive: true});
-
             calendarContainer.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                touchEndY = e.changedTouches[0].screenY;
+                touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY;
                 handleSwipe();
             }, {passive: true});
         }
@@ -388,10 +340,9 @@
         function handleSwipe() {
             const deltaX = touchEndX - touchStartX;
             const deltaY = touchEndY - touchStartY;
-            const threshold = 40; 
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
-                if (deltaX > 0) changeMonth(-1); // 向右滑，上個月
-                else changeMonth(1);  // 向左滑，下個月
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+                if (deltaX > 0) changeMonth(-1); 
+                else changeMonth(1); 
             }
         }
 
@@ -399,9 +350,7 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('installBtn').classList.add('hidden');
-                    }
+                    if (choiceResult.outcome === 'accepted') document.getElementById('installBtn').classList.add('hidden');
                     deferredPrompt = null;
                 });
             }
@@ -417,10 +366,13 @@
 
         function calculateAllCycles() {
             const dates = Object.keys(records).sort();
-            const cycles = [];
+            const flowCycles = [];
             let currentCycle = null;
 
             for (const dateStr of dates) {
+                const record = records[dateStr];
+                if (!record.status || record.status === 'special_no_flow' || record.status === 'none') continue; 
+
                 if (!currentCycle) {
                     currentCycle = { start: dateStr, end: dateStr, records: [dateStr] };
                 } else {
@@ -432,26 +384,63 @@
                         currentCycle.end = dateStr;
                         currentCycle.records.push(dateStr);
                     } else {
-                        cycles.push(currentCycle);
+                        flowCycles.push(currentCycle);
                         currentCycle = { start: dateStr, end: dateStr, records: [dateStr] };
                     }
                 }
             }
-            if (currentCycle) cycles.push(currentCycle);
+            if (currentCycle) flowCycles.push(currentCycle);
 
-            cycles.forEach(c => {
-                c.duration = c.records.length; 
-                c.hasSpecial = false;
-                c.notes = []; 
-                c.records.forEach(d => { 
-                    const record = records[d];
-                    if(record.status === 'special') c.hasSpecial = true; 
-                    if(record.note) {
-                        c.notes.push({ date: d, text: record.note, status: record.status });
-                    }
+            const allGrouped = [];
+            
+            if (flowCycles.length === 0 || (dates.length > 0 && dates[0] < flowCycles[0].start)) {
+                allGrouped.push({
+                    start: null, end: null, duration: 0,
+                    periodNotes: [], generalNotes: [],
+                    hasSpecialPeriod: false, hasSpecialGeneral: false
                 });
+            }
+
+            flowCycles.forEach(fc => {
+                const sObj = new Date(fc.start);
+                const eObj = new Date(fc.end);
+                fc.duration = Math.ceil((eObj - sObj) / (1000 * 60 * 60 * 24)) + 1;
+                fc.periodNotes = [];
+                fc.generalNotes = [];
+                fc.hasSpecialPeriod = false;
+                fc.hasSpecialGeneral = false;
+                allGrouped.push(fc);
             });
-            return cycles;
+
+            dates.forEach(d => {
+                const rec = records[d];
+                const hasNote = rec.note && rec.note.trim() !== '';
+                const hasMeds = !!rec.tookMeds;
+                const isSpecial = rec.status === 'special';
+                const isSpecialNoFlow = rec.status === 'special_no_flow';
+
+                if (!hasNote && !hasMeds && !isSpecial && !isSpecialNoFlow) return; 
+
+                let targetCycle = allGrouped.length > 0 ? allGrouped[allGrouped.length - 1] : null;
+                for (let i = 0; i < allGrouped.length; i++) {
+                    if (allGrouped[i].end && d <= allGrouped[i].end) {
+                        targetCycle = allGrouped[i];
+                        break;
+                    }
+                }
+
+                if (targetCycle) {
+                    if (targetCycle.start && d >= targetCycle.start && d <= targetCycle.end) {
+                        targetCycle.periodNotes.push({ date: d, data: rec });
+                        if (isSpecial) targetCycle.hasSpecialPeriod = true;
+                    } else {
+                        targetCycle.generalNotes.push({ date: d, data: rec });
+                        if (isSpecialNoFlow) targetCycle.hasSpecialGeneral = true;
+                    }
+                }
+            });
+
+            return allGrouped;
         }
 
         function changeMonth(delta) {
@@ -463,7 +452,7 @@
         function renderAll(delta = 0) {
             const allCycles = calculateAllCycles();
             renderCalendar(allCycles, delta);
-            renderList(allCycles);
+            renderList();
         }
 
         function renderCalendar(allCycles, delta = 0) {
@@ -480,16 +469,14 @@
             
             const calendarContainer = document.getElementById('calendarContainer');
             calendarContainer.classList.remove('slide-left', 'slide-right');
-            void calendarContainer.offsetWidth; // 觸發重繪
+            void calendarContainer.offsetWidth; 
             if (delta > 0) calendarContainer.classList.add('slide-left');
             else if (delta < 0) calendarContainer.classList.add('slide-right');
 
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
 
-            for (let i = 0; i < firstDay; i++) {
-                grid.innerHTML += `<div class="p-1"></div>`;
-            }
+            for (let i = 0; i < firstDay; i++) { grid.innerHTML += `<div class="p-1"></div>`; }
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
@@ -499,44 +486,48 @@
                 
                 let btnClass = "relative h-[42px] sm:h-[48px] flex flex-col items-center justify-center rounded-[1rem] border-[3px] transition-transform active:scale-90 font-extrabold ";
                 
-                if (record) {
+                if (record && record.status && STATUS_OPTIONS[record.status]) {
                     btnClass += STATUS_OPTIONS[record.status].colorClass;
                 } else {
                     btnClass += isToday ? "bg-white border-emerald-400 text-emerald-600 shadow-md" : "bg-emerald-50/50 border-transparent text-emerald-800 hover:bg-emerald-100";
                 }
-                const dotColor = (record && (record.status === 'heavy' || record.status === 'normal' || record.status === 'special')) ? 'bg-white' : 'bg-emerald-700';
-                const dotHtml = (record && record.note) ? `<span class="absolute bottom-0.5 w-1.5 h-1.5 rounded-full ${dotColor} opacity-90 border border-black/10"></span>` : '';
+                
+                let dotColor = 'bg-emerald-700'; 
+                if (record && ['normal', 'heavy', 'special'].includes(record.status)) {
+                    dotColor = 'bg-white shadow-[0_0_2px_rgba(0,0,0,0.6)]'; 
+                } else if (record && record.status === 'special_no_flow') {
+                    dotColor = 'bg-[#451a03] shadow-sm'; 
+                }
+                const dotHtml = (record && record.note && record.note.trim() !== '') ? `<span class="absolute bottom-[3px] w-1 h-1 rounded-full ${dotColor} opacity-95"></span>` : '';
+                
+                const medsHtml = (record && record.tookMeds) ? `<span class="absolute top-0 right-0 text-[8px] transform scale-75 origin-top-right drop-shadow-[0_0_2px_rgba(255,255,255,1)] z-20 opacity-95">💊</span>` : '';
 
-                grid.innerHTML += `<button onclick="openEditModal('${dateStr}')" class="${btnClass}"><span class="z-10 text-sm sm:text-base">${day}</span>${dotHtml}</button>`;
+                grid.innerHTML += `<button onclick="openEditModal('${dateStr}')" class="${btnClass}"><span class="z-10 text-[14px] sm:text-[15px] font-extrabold tracking-tighter leading-none mb-[3px]">${day}</span>${dotHtml}${medsHtml}</button>`;
             }
 
-            const cyclesInView = allCycles.filter(c => c.end >= viewStartStr && c.start <= viewEndStr);
+            const validCycles = allCycles.filter(c => c.start !== null && c.end >= viewStartStr && c.start <= viewEndStr);
             const summaryEl = document.getElementById('cycleSummary');
-            if (cyclesInView.length > 0) {
-                const latest = cyclesInView[cyclesInView.length - 1];
+            if (validCycles.length > 0) {
+                const latest = validCycles[validCycles.length - 1];
                 const sFormat = latest.start.slice(5).replace('-', '/');
                 const eFormat = latest.end.slice(5).replace('-', '/');
-                summaryEl.innerHTML = `🐍 當次月經統計：${sFormat} ~ ${eFormat} <span class="text-rose-500 ml-1">共 ${latest.duration} 天</span>`;
+                const durationText = latest.duration > 0 ? `共 ${latest.duration} 天` : `無月經`;
+                summaryEl.innerHTML = `🐍 當次紀錄：${sFormat} ~ ${eFormat} <span class="text-rose-500 ml-1">${durationText}</span>`;
             } else {
-                summaryEl.innerHTML = `<span class="opacity-60">本月尚無完整月經紀錄喔 🥚</span>`;
+                summaryEl.innerHTML = `<span class="opacity-60">本月尚無月經紀錄 🥚</span>`;
             }
         }
 
-        function renderList(allCycles) {
+        function renderList() {
             const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const viewStartStr = getFormatDate(new Date(year, month, 1));
-            const viewEndStr = getFormatDate(new Date(year, month + 1, 0));
-            
-            const cyclesInView = allCycles.filter(c => c.end >= viewStartStr && c.start <= viewEndStr);
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const prefix = `${year}-${month}`;
             
             let recordsToDisplay = [];
-            cyclesInView.forEach(c => {
-                c.records.forEach(d => {
-                    if (records[d] && records[d].note && records[d].note.trim() !== '') {
-                        recordsToDisplay.push([d, records[d]]);
-                    }
-                });
+            Object.keys(records).forEach(d => {
+                if (d.startsWith(prefix) && records[d].note && records[d].note.trim() !== '') {
+                    recordsToDisplay.push([d, records[d]]);
+                }
             });
             recordsToDisplay.sort(([a], [b]) => a.localeCompare(b));
 
@@ -547,7 +538,7 @@
                 listContainer.innerHTML = `
                     <div class="text-center py-6 text-emerald-600 font-extrabold bg-white rounded-3xl border-4 border-dashed border-emerald-300 mt-2 flex flex-col items-center shadow-sm">
                         <span class="text-4xl mb-2 opacity-80">🍃</span>
-                        這段期間沒有寫備註唷～<br/>點擊上方月曆可以新增！
+                        這段期間沒有寫文字備註唷～<br/>吃藥紀錄會直接顯示在月曆上！
                     </div>
                 `;
                 return;
@@ -557,12 +548,15 @@
             const slicedRecords = recordsToDisplay.slice(0, displayCount);
 
             slicedRecords.forEach(([date, data]) => {
-                const statusInfo = STATUS_OPTIONS[data.status];
+                const statusInfo = (data.status && STATUS_OPTIONS[data.status]) 
+                    ? STATUS_OPTIONS[data.status] 
+                    : { label: '日常', colorClass: 'bg-emerald-50 border-emerald-200 text-emerald-700' };
+
                 listContainer.innerHTML += `
                     <div onclick="openEditModal('${date}')" class="bg-white border-2 border-emerald-200 rounded-[1rem] p-2.5 flex items-start gap-3 shadow-sm cursor-pointer hover:-translate-y-0.5 transition-transform active:scale-[0.98]">
-                        <div class="shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center border-2 ${statusInfo.colorClass}">
-                            <span class="text-[10px] opacity-90 font-extrabold leading-tight">${date.slice(5).replace('-', '/')}</span>
-                            <span class="font-extrabold text-xs tracking-widest leading-tight">${statusInfo.label}</span>
+                        <div class="relative shrink-0 w-[48px] h-[48px] rounded-xl flex flex-col items-center justify-center border-2 ${statusInfo.colorClass}">
+                            <span class="text-[10px] sm:text-[11px] font-black leading-none mb-1">${date.slice(5).replace('-', '/')}</span>
+                            <span class="text-[9px] font-black whitespace-nowrap tracking-tighter sm:tracking-normal leading-none scale-[0.9] sm:scale-100">${statusInfo.label}</span>
                         </div>
                         <div class="flex-1 py-0.5">
                             <p class="text-[13px] font-bold text-gray-800 break-words whitespace-pre-wrap leading-snug">${data.note}</p>
@@ -572,24 +566,13 @@
             });
 
             if (!isListExpanded && recordsToDisplay.length > 10) {
-                listContainer.innerHTML += `
-                    <button onclick="toggleListExpand()" class="w-full py-2.5 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-xl border-[3px] border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2 text-sm">
-                        <i class="fa-solid fa-angle-down mr-1"></i> 翻開更多...
-                    </button>
-                `;
+                listContainer.innerHTML += `<button onclick="toggleListExpand()" class="w-full py-2.5 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-xl border-[3px] border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2 text-sm"><i class="fa-solid fa-angle-down mr-1"></i> 翻開更多...</button>`;
             } else if (isListExpanded && recordsToDisplay.length > 10) {
-                 listContainer.innerHTML += `
-                    <button onclick="toggleListExpand()" class="w-full py-2.5 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-xl border-[3px] border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2 text-sm">
-                        <i class="fa-solid fa-angle-up mr-1"></i> 收起筆記
-                    </button>
-                `;
+                 listContainer.innerHTML += `<button onclick="toggleListExpand()" class="w-full py-2.5 text-center text-emerald-700 font-extrabold bg-emerald-50 rounded-xl border-[3px] border-emerald-200 shadow-sm active:scale-95 transition-transform mt-2 text-sm"><i class="fa-solid fa-angle-up mr-1"></i> 收起筆記</button>`;
             }
         }
 
-        function toggleListExpand() {
-            isListExpanded = !isListExpanded;
-            renderAll();
-        }
+        function toggleListExpand() { isListExpanded = !isListExpanded; renderAll(); }
 
         let toastTimeout;
         function showCustomToast(msg, icon = '🐍') {
@@ -604,7 +587,7 @@
         }
 
         function getFeedbackMessage(status) {
-            if(status === 'special') return sPrefix[Math.floor(Math.random()*sPrefix.length)] + sBody[Math.floor(Math.random()*sBody.length)] + sSuffix[Math.floor(Math.random()*sSuffix.length)];
+            if(status === 'special' || status === 'special_no_flow') return sPrefix[Math.floor(Math.random()*sPrefix.length)] + sBody[Math.floor(Math.random()*sBody.length)] + sSuffix[Math.floor(Math.random()*sSuffix.length)];
             return nPrefix[Math.floor(Math.random()*nPrefix.length)] + nBody[Math.floor(Math.random()*nBody.length)] + nSuffix[Math.floor(Math.random()*nSuffix.length)];
         }
 
@@ -612,9 +595,14 @@
             editingDate = dateStr;
             const record = records[dateStr];
             document.getElementById('modalDateTitle').innerText = `${dateStr}`;
-            document.getElementById('noteInput').value = record ? record.note : '';
-            currentStatus = record ? record.status : 'normal';
+            document.getElementById('noteInput').value = record && record.note ? record.note : '';
+            
+            currentStatus = (record && record.status && record.status !== 'none') ? record.status : null;
+            currentTookMeds = record ? !!record.tookMeds : false;
+            
             updateStatusButtonsUI();
+            updateMedsUI();
+
             const deleteBtn = document.getElementById('deleteBtn');
             if (record) deleteBtn.classList.remove('hidden');
             else deleteBtn.classList.add('hidden');
@@ -623,59 +611,100 @@
 
         function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
 
+        function toggleMeds() {
+            currentTookMeds = !currentTookMeds;
+            updateMedsUI();
+            
+            if (currentTookMeds) {
+                const msg = mPrefix[Math.floor(Math.random()*mPrefix.length)] + mBody[Math.floor(Math.random()*mBody.length)] + mSuffix[Math.floor(Math.random()*mSuffix.length)];
+                showCustomToast(msg, '💊');
+            }
+        }
+
+        function updateMedsUI() {
+            const bg = document.getElementById('medsToggleBg');
+            const knob = document.getElementById('medsKnob');
+            if (currentTookMeds) {
+                bg.classList.remove('bg-gray-300'); bg.classList.add('bg-emerald-400');
+                knob.style.transform = 'translateX(26px)';
+            } else {
+                bg.classList.remove('bg-emerald-400'); bg.classList.add('bg-gray-300');
+                knob.style.transform = 'translateX(0)';
+            }
+        }
+
         function selectStatus(statusId) {
-            currentStatus = statusId;
+            if (currentStatus === statusId) {
+                currentStatus = null; 
+            } else {
+                currentStatus = statusId;
+                showCustomToast(getFeedbackMessage(statusId), '🐍');
+            }
             updateStatusButtonsUI();
-            showCustomToast(getFeedbackMessage(statusId), '🐍');
         }
 
         function updateStatusButtonsUI() {
-            ['light', 'normal', 'heavy', 'special'].forEach(id => {
+            ['light', 'normal', 'heavy', 'special', 'special_no_flow'].forEach(id => {
                 const btn = document.getElementById(`btn-${id}`);
                 const info = STATUS_OPTIONS[id];
                 if (id === currentStatus) {
-                    btn.className = `status-btn py-3 rounded-2xl font-extrabold border-[4px] transition-transform active:scale-95 scale-105 shadow-lg ${info.colorClass}`;
+                    btn.className = `status-btn py-2.5 rounded-2xl font-extrabold border-[4px] transition-transform active:scale-95 scale-105 shadow-md ${info.colorClass}`;
+                    if(id === 'special' || id === 'special_no_flow') btn.classList.add('col-span-3', 'text-[13px]', 'sm:text-sm', 'mt-1');
+                    else btn.classList.add('col-span-2', 'text-sm', 'px-1');
                 } else {
-                    btn.className = `status-btn py-3 rounded-2xl font-extrabold border-4 bg-white border-gray-200 text-gray-400 transition-transform active:scale-95 hover:bg-gray-50`;
+                    btn.className = `status-btn py-2.5 rounded-2xl font-extrabold border-4 bg-white border-gray-200 text-gray-400 transition-transform active:scale-95 hover:bg-gray-50`;
+                    if(id === 'special' || id === 'special_no_flow') btn.classList.add('col-span-3', 'text-[13px]', 'sm:text-sm', 'mt-1');
+                    else btn.classList.add('col-span-2', 'text-sm', 'px-1');
                 }
             });
         }
 
         function saveRecord() {
-            records[editingDate] = { status: currentStatus, note: document.getElementById('noteInput').value.trim() };
+            const note = document.getElementById('noteInput').value.trim();
+            if(!currentStatus && !currentTookMeds && note === '') {
+                delete records[editingDate];
+            } else {
+                records[editingDate] = { status: currentStatus, tookMeds: currentTookMeds, note: note };
+            }
             saveToLocal(); closeEditModal(); renderAll(); 
-            showCustomToast('已經幫你記下來囉！', '✔️');
+            if(currentTookMeds && !currentStatus && note === '') {
+                // 已跳過提示
+            } else {
+                showCustomToast('已經幫你記下來囉！', '✔️');
+            }
         }
 
         function openDataModal() { document.getElementById('dataModal').style.display = 'flex'; }
         function closeDataModal() { document.getElementById('dataModal').style.display = 'none'; }
-
         function openConfirmModal() { document.getElementById('confirmModal').style.display = 'flex'; }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
         function executeDelete() {
             delete records[editingDate];
-            saveToLocal(); 
-            closeConfirmModal();
-            closeEditModal(); 
-            renderAll(); 
+            saveToLocal(); closeConfirmModal(); closeEditModal(); renderAll(); 
             showCustomToast('紀錄已經擦掉囉 🧽', '🗑️');
         }
 
         function saveToLocal() { localStorage.setItem('period_records', JSON.stringify(records)); }
 
+        // === 醫療報表雙軌渲染 ===
         function openStatsModal() {
             const modal = document.getElementById('statsModal');
             const content = document.getElementById('statsModalContent');
-            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
             renderStats();
         }
 
         function closeStatsModal() {
+            const modal = document.getElementById('statsModal');
             const content = document.getElementById('statsModalContent');
             content.classList.add('translate-y-full');
-            setTimeout(() => { document.getElementById('statsModal').style.display = 'none'; }, 300);
+            setTimeout(() => { 
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
         }
 
         function renderStats() {
@@ -683,119 +712,170 @@
             const endStr = document.getElementById('endDate').value;
             const listContainer = document.getElementById('statsList');
             const chartContainer = document.getElementById('chartContainer');
+            const summaryBox = document.getElementById('statsSummaryBox');
 
             if(!startStr || !endStr || startStr > endStr) {
                 listContainer.innerHTML = `<div class="text-center py-4 text-red-500 font-extrabold">日期選錯囉！檢查一下 🙈</div>`; 
-                chartContainer.classList.add('hidden');
+                chartContainer.classList.add('hidden'); summaryBox.classList.add('hidden');
                 return;
             }
 
-            const allCycles = calculateAllCycles();
-            currentDisplayCycles = allCycles.filter(c => c.end >= startStr && c.start <= endStr).reverse();
+            let totalMedsCount = 0;
+            Object.keys(records).forEach(d => {
+                if(d >= startStr && d <= endStr && records[d].tookMeds) totalMedsCount++;
+            });
 
-            listContainer.innerHTML = '';
+            const allCycles = calculateAllCycles();
+            
+            currentDisplayCycles = allCycles.filter(c => {
+                if (c.start === null) {
+                    c.generalNotes = c.generalNotes.filter(n => n.date >= startStr && n.date <= endStr);
+                    return c.generalNotes.length > 0;
+                }
+                return c.end >= startStr && c.start <= endStr;
+            }).reverse();
+
+            summaryBox.classList.remove('hidden');
+            const realFlowCycles = currentDisplayCycles.filter(c => c.duration > 0).length;
+            document.getElementById('statsCycleCount').innerText = realFlowCycles;
+            document.getElementById('statsMedsCount').innerText = totalMedsCount;
+
+            let html = '';
 
             if (currentDisplayCycles.length === 0) {
                 chartContainer.classList.add('hidden');
                 listContainer.innerHTML = `
-                    <div class="text-center py-10 text-emerald-600 font-extrabold bg-white rounded-3xl border-4 border-dashed border-emerald-300 shadow-sm">
-                        <span class="text-4xl mb-2 block opacity-80">🏥</span>這段時間沒有紀錄喔！
+                    <div class="text-center py-8 text-emerald-600 font-extrabold bg-white rounded-3xl border-4 border-dashed border-emerald-300 shadow-sm mt-4">
+                        <span class="text-4xl mb-2 block opacity-80">🏥</span>這段時間沒有任何紀錄喔！<br><span class="text-sm text-emerald-500 font-bold mt-2 inline-block">上方可查看服藥總天數 💊</span>
                     </div>
                 `; return;
             }
 
-            chartContainer.classList.remove('hidden');
-            const chartCycles = [...currentDisplayCycles].reverse();
-            const labels = chartCycles.map(c => c.start.slice(5).replace('-', '/'));
-            const chartData = chartCycles.map(c => c.duration);
+            const validChartCycles = [...currentDisplayCycles].reverse().filter(c => c.duration > 0);
+            if(validChartCycles.length > 0) {
+                chartContainer.classList.remove('hidden');
+                const labels = validChartCycles.map(c => c.start.slice(5).replace('-', '/'));
+                const chartData = validChartCycles.map(c => c.duration);
 
-            const ctx = document.getElementById('periodChart').getContext('2d');
-            if (window.periodChartInstance) window.periodChartInstance.destroy();
-            
-            window.periodChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '月經天數',
-                        data: chartData,
-                        backgroundColor: chartData.map(d => d > 10 ? 'rgba(244, 63, 94, 0.85)' : 'rgba(52, 211, 153, 0.85)'),
-                        borderColor: chartData.map(d => d > 10 ? 'rgba(225, 29, 72, 1)' : 'rgba(16, 185, 129, 1)'),
-                        borderWidth: 2,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            suggestedMax: Math.max(...chartData, 12),
-                            title: { display: true, text: '總天數', font: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif", weight: 'bold' } },
-                            grid: {
-                                color: (context) => context.tick.value === 10 ? 'rgba(244, 63, 94, 0.5)' : 'rgba(0,0,0,0.05)',
-                                lineWidth: (context) => context.tick.value === 10 ? 2 : 1
-                            }
-                        },
-                        x: { ticks: { font: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif", weight: 'bold' } } }
+                const ctx = document.getElementById('periodChart').getContext('2d');
+                if (window.periodChartInstance) window.periodChartInstance.destroy();
+                window.periodChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '月經天數', data: chartData,
+                            backgroundColor: chartData.map(d => d > 10 ? 'rgba(244, 63, 94, 0.85)' : 'rgba(52, 211, 153, 0.85)'),
+                            borderColor: chartData.map(d => d > 10 ? 'rgba(225, 29, 72, 1)' : 'rgba(16, 185, 129, 1)'),
+                            borderWidth: 2, borderRadius: 6
+                        }]
                     },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            titleFont: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif" },
-                            bodyFont: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif" },
-                            callbacks: {
-                                label: (context) => context.raw > 10 ? `${context.raw} 天 (⚠️ 超過10天危險指標)` : `${context.raw} 天`
-                            }
-                        }
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, suggestedMax: Math.max(...chartData, 12), title: { display: true, text: '流血天數', font: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif", weight: 'bold' } }, grid: { color: (context) => context.tick.value === 10 ? 'rgba(244, 63, 94, 0.5)' : 'rgba(0,0,0,0.05)', lineWidth: (context) => context.tick.value === 10 ? 2 : 1 } },
+                            x: { ticks: { font: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif", weight: 'bold' } } }
+                        },
+                        plugins: { legend: { display: false }, tooltip: { titleFont: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif" }, bodyFont: { family: "'M PLUS Rounded 1c', 'Nunito', sans-serif" }, callbacks: { label: (context) => context.raw > 10 ? `${context.raw} 天 (⚠️ 超過10天危險指標)` : `${context.raw} 天` } } }
                     }
-                }
-            });
+                });
+            } else {
+                chartContainer.classList.add('hidden');
+            }
 
             currentDisplayCycles.forEach((cycle, index) => {
-                const sFormat = cycle.start.replace(/-/g, '/');
-                const eFormat = cycle.end.replace(/-/g, '/');
-                const warnBadge = cycle.hasSpecial ? 
-                    `<button onclick="openSpecialNoteModal(${index})" class="ml-1 text-[11px] bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full shadow-sm align-middle hover:bg-amber-300 active:scale-90 transition-transform cursor-pointer font-extrabold inline-flex items-center">⚠️ 看備註</button>` : '';
+                const sFormat = cycle.start ? cycle.start.replace(/-/g, '/') : '';
+                const eFormat = cycle.end ? cycle.end.replace(/-/g, '/') : '';
+                
+                let buttonsHtml = '';
+                
+                if (cycle.periodNotes.length > 0) {
+                    const icon = cycle.hasSpecialPeriod ? '⚠️' : '📝';
+                    const btnClass = cycle.hasSpecialPeriod ? 'bg-rose-500 text-white hover:bg-rose-600 border-transparent' : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border-rose-300 border-2';
+                    buttonsHtml += `<button onclick="openNoteModal(${index}, 'period')" class="text-[11px] sm:text-xs ${btnClass} px-3 py-1.5 rounded-lg shadow-sm active:scale-95 transition-transform font-extrabold flex items-center gap-1">${icon} 經期備註</button>`;
+                }
+                
+                if (cycle.generalNotes.length > 0) {
+                    const icon = cycle.hasSpecialGeneral ? '⚠️' : '🍃';
+                    const btnClass = cycle.hasSpecialGeneral ? 'bg-amber-400 text-amber-950 hover:bg-amber-500 border-transparent' : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-300 border-2';
+                    buttonsHtml += `<button onclick="openNoteModal(${index}, 'general')" class="text-[11px] sm:text-xs ${btnClass} px-3 py-1.5 rounded-lg shadow-sm active:scale-95 transition-transform font-extrabold flex items-center gap-1">${icon} 一般備註</button>`;
+                }
+
                 const isDanger = cycle.duration > 10;
                 const durationClass = isDanger ? "text-rose-600 bg-rose-100 border-rose-300" : "text-emerald-700 bg-emerald-50 border-emerald-200";
 
-                listContainer.innerHTML += `
-                    <div class="bg-white border-[3px] ${isDanger ? 'border-rose-100' : 'border-emerald-100'} rounded-2xl p-3 flex justify-between items-center shadow-sm hover:bg-gray-50 transition-colors">
-                        <div class="font-extrabold ${isDanger ? 'text-rose-900' : 'text-emerald-900'} text-sm sm:text-base tracking-tight flex items-center flex-wrap gap-y-1">
-                            ${sFormat} <span class="text-gray-300 mx-0.5">~</span> ${eFormat}
-                            ${warnBadge}
-                        </div>
-                        <div class="font-extrabold px-3 py-1.5 rounded-xl border-2 shrink-0 text-sm ml-2 ${durationClass}">
-                            共 ${cycle.duration} 天
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function openSpecialNoteModal(index) {
-            const cycle = currentDisplayCycles[index];
-            const contentDiv = document.getElementById('specialNoteContent');
-            contentDiv.innerHTML = '';
-
-            if (cycle.notes.length === 0) {
-                contentDiv.innerHTML = `<div class="text-center py-5 text-amber-700 font-bold bg-amber-50 rounded-2xl border-2 border-dashed border-amber-200">只有標示狀態，沒有寫字唷 🍃</div>`;
-            } else {
-                cycle.notes.forEach(note => {
-                    const isSpecial = note.status === 'special';
-                    const badge = isSpecial ? `<span class="text-[10px] bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full ml-2 shadow-sm">特殊</span>` : '';
-                    const borderClass = isSpecial ? 'border-amber-300 bg-amber-50' : 'border-gray-100 bg-[#f8fafc]';
-                    
-                    contentDiv.innerHTML += `
-                        <div class="${borderClass} border-[3px] rounded-2xl p-3">
-                            <div class="text-xs font-extrabold text-emerald-800 mb-1.5 flex items-center">
-                                📅 ${note.date.replace(/-/g, '/')} ${badge}
+                if (cycle.start === null) {
+                    html += `
+                        <div class="bg-white border-[3px] border-emerald-100 rounded-2xl p-3 flex flex-col gap-2.5 shadow-sm hover:bg-gray-50 transition-colors mb-3">
+                            <div class="flex justify-between items-center w-full">
+                                <div class="font-extrabold text-emerald-900 text-[13px] sm:text-sm tracking-tight flex items-center">
+                                    [ 區間無月經紀錄 ]
+                                </div>
                             </div>
-                            <div class="text-sm font-bold text-gray-800 whitespace-pre-wrap leading-relaxed">${note.text}</div>
+                            ${buttonsHtml ? `<div class="flex flex-wrap gap-2">${buttonsHtml}</div>` : ''}
                         </div>
                     `;
+                } else {
+                    html += `
+                        <div class="bg-white border-[3px] ${isDanger ? 'border-rose-100' : 'border-emerald-100'} rounded-2xl p-3 flex flex-col gap-2.5 shadow-sm hover:bg-gray-50 transition-colors mb-3">
+                            <div class="flex justify-between items-center w-full">
+                                <div class="font-extrabold ${isDanger ? 'text-rose-900' : 'text-emerald-900'} text-[13px] sm:text-[14px] tracking-tighter sm:tracking-tight flex items-center">
+                                    ${sFormat} <span class="text-gray-400 mx-1.5 font-normal">~</span> ${eFormat}
+                                </div>
+                                <div class="font-extrabold px-2.5 py-1 rounded-lg border-2 shrink-0 text-[11px] sm:text-[12px] ml-1 ${durationClass}">共 ${cycle.duration} 天</div>
+                            </div>
+                            ${buttonsHtml ? `<div class="flex flex-wrap gap-2">${buttonsHtml}</div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+            
+            listContainer.innerHTML = html;
+        }
+
+        function openNoteModal(index, type) {
+            const cycle = currentDisplayCycles[index];
+            const contentDiv = document.getElementById('specialNoteContent');
+            const titleEl = document.getElementById('noteModalTitle');
+            const iconEl = document.getElementById('noteModalFloatIcon');
+            
+            let notes = type === 'period' ? cycle.periodNotes : cycle.generalNotes;
+            
+            if (type === 'period') {
+                titleEl.innerText = '經期備註';
+                iconEl.innerText = cycle.hasSpecialPeriod ? '⚠️' : '📝';
+            } else {
+                titleEl.innerText = '一般備註';
+                iconEl.innerText = cycle.hasSpecialGeneral ? '⚠️' : '🍃';
+            }
+            
+            notes.sort((a,b) => b.date.localeCompare(a.date));
+
+            contentDiv.innerHTML = '';
+            if (notes.length === 0) {
+                contentDiv.innerHTML = `<div class="text-center py-5 text-amber-700 font-bold bg-amber-50 rounded-2xl border-2 border-dashed border-amber-200">沒有寫字唷 🍃</div>`;
+            } else {
+                notes.forEach(n => {
+                    const isSpecial = n.data.status === 'special' || n.data.status === 'special_no_flow';
+                    const stateLabel = isSpecial ? '特殊' : '一般';
+                    const stateColor = isSpecial ? 'bg-amber-400 text-amber-950 border-transparent' : 'bg-emerald-100 text-emerald-800 border-emerald-300 border';
+                    
+                    const badge = `<span class="text-[10px] ${stateColor} px-2 py-0.5 rounded-md shadow-sm ml-1">${stateLabel}</span>`;
+                    
+                    // 【修正】：只保留膠囊圖示，並放置於標籤右方
+                    const medsBadge = n.data.tookMeds ? `<span class="text-[13px] ml-1.5 drop-shadow-sm">💊</span>` : '';
+                    
+                    const bgClass = isSpecial ? 'border-amber-300 bg-amber-50' : 'border-emerald-200 bg-[#f8fafc]';
+                    
+                    const textContent = (n.data && n.data.note && n.data.note.trim() !== '') ? n.data.note : '<span class="text-gray-400 italic text-[11px]">(純標記，無文字)</span>';
+
+                    contentDiv.innerHTML += `
+                        <div class="${bgClass} border-[3px] rounded-2xl p-3">
+                            <div class="text-xs font-extrabold text-emerald-900 mb-1.5 flex items-center flex-wrap gap-y-1">
+                                📅 ${n.date.replace(/-/g, '/')} ${badge} ${medsBadge}
+                            </div>
+                            <div class="text-sm font-bold text-gray-800 whitespace-pre-wrap leading-relaxed">${textContent}</div>
+                        </div>`;
                 });
             }
             document.getElementById('specialNoteModal').style.display = 'flex';
@@ -804,15 +884,11 @@
         function closeSpecialNoteModal() { document.getElementById('specialNoteModal').style.display = 'none'; }
 
         function handleExport() {
-            if(Object.keys(records).length === 0) { 
-                showCustomToast('目前還沒有紀錄喔！', '❌'); 
-                return; 
-            }
-            const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+            if(Object.keys(records).length === 0) { showCustomToast('目前還沒有紀錄喔！', '❌'); return; }
             const a = document.createElement('a');
-            a.href = url; a.download = `snake_records_${getTodayStr().replace(/-/g, '')}.json`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' })); 
+            a.download = `snake_records_${getTodayStr().replace(/-/g, '')}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); 
             showCustomToast('已經幫你打包好備份囉！', '📦');
         }
 
@@ -823,12 +899,9 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if(typeof data === 'object' && !Array.isArray(data)) {
-                        records = data; saveToLocal(); renderAll(); 
-                        showCustomToast('資料匯入成功！ 🐍🎉', '✨');
+                        records = data; saveToLocal(); renderAll(); showCustomToast('資料匯入成功！ 🐍🎉', '✨');
                     } else throw new Error();
-                } catch (error) { 
-                    showCustomToast('哎呀，檔案格式不對喔。', '❌'); 
-                }
+                } catch (error) { showCustomToast('哎呀，檔案格式不對喔。', '❌'); }
             };
             reader.readAsText(file); event.target.value = '';
         }
